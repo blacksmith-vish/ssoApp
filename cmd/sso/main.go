@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"sso/internal/config"
+	"sso/internal/lib/logger/handlers/pretty"
 	"syscall"
 
 	"sso/internal/app"
@@ -34,9 +35,8 @@ func main() {
 		conf.TokenTTL,
 	)
 
+	// Инициализация gRPC-сервер
 	go application.GRPCServer.MustRun()
-
-	// TODO: инициализация gRPC-сервер
 
 	// TODO: Graceful shut down
 
@@ -61,9 +61,7 @@ func setupLogger(env string) *slog.Logger {
 	switch env {
 
 	case envLocal:
-		log = slog.New(
-			slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
-		)
+		log = setupPrettySlog()
 
 	case envDev:
 		log = slog.New(
@@ -77,4 +75,16 @@ func setupLogger(env string) *slog.Logger {
 	}
 
 	return log
+}
+
+func setupPrettySlog() *slog.Logger {
+	opts := pretty.PrettyHandlerOptions{
+		SlogOpts: &slog.HandlerOptions{
+			Level: slog.LevelDebug,
+		},
+	}
+
+	handler := opts.NewPrettyHandler(os.Stdout)
+
+	return slog.New(handler)
 }
