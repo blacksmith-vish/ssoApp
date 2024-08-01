@@ -33,6 +33,7 @@ func (opts PrettyHandlerOptions) NewPrettyHandler(
 }
 
 func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
+
 	level := r.Level.String() + ":"
 
 	switch r.Level {

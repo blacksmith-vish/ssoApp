@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"sso/internal/config"
-	"sso/internal/lib/logger/handlers/pretty"
+	"sso/internal/lib/log/handlers/pretty"
 	"syscall"
 
 	"sso/internal/app"
@@ -27,7 +27,7 @@ func main() {
 
 	log.Info("start app")
 
-	// TODO: инициализация приложения (app)
+	// Инициализация приложения
 	application := app.New(
 		log,
 		conf.GRPC.Port,
@@ -38,12 +38,10 @@ func main() {
 	// Инициализация gRPC-сервер
 	go application.GRPCServer.MustRun()
 
-	// TODO: Graceful shut down
+	// Graceful shut down
 
 	stop := make(chan os.Signal, 1)
-
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
-
 	sig := <-stop
 
 	log.Info("application stopping", slog.String("signal", sig.String()))
@@ -51,33 +49,34 @@ func main() {
 	application.GRPCServer.Stop()
 
 	log.Info("application stopped")
-
 }
 
 func setupLogger(env string) *slog.Logger {
 
-	var log *slog.Logger
-
 	switch env {
 
 	case envLocal:
-		log = setupPrettySlog()
+		return setupPrettySlog()
 
 	case envDev:
-		log = slog.New(
+		return slog.New(
 			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
 		)
 
 	case envProd:
-		log = slog.New(
+		return slog.New(
 			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
 		)
-	}
 
-	return log
+	default:
+		return slog.New(
+			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}),
+		)
+	}
 }
 
 func setupPrettySlog() *slog.Logger {
+
 	opts := pretty.PrettyHandlerOptions{
 		SlogOpts: &slog.HandlerOptions{
 			Level: slog.LevelDebug,
