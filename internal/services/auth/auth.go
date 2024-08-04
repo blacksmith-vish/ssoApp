@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	def "sso/internal/api/auth"
 	errs "sso/internal/domain/errors"
-	"sso/internal/domain/models"
-	def "sso/internal/grpc/auth"
 	"sso/internal/lib/jwt"
+	"sso/internal/storage/models"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"

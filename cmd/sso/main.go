@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"sso/internal/config"
+	"sso/internal/lib/log/handlers/dev"
 	"sso/internal/lib/log/handlers/pretty"
 	"syscall"
 
@@ -56,7 +57,7 @@ func setupLogger(env string) *slog.Logger {
 	switch env {
 
 	case envLocal:
-		return setupPrettySlog()
+		return setupDeveloperLog()
 
 	case envDev:
 		return slog.New(
@@ -73,6 +74,15 @@ func setupLogger(env string) *slog.Logger {
 			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}),
 		)
 	}
+}
+
+func setupDeveloperLog() *slog.Logger {
+	return slog.New(
+		dev.New(
+			os.Stdout,
+			&slog.HandlerOptions{Level: slog.LevelDebug},
+		),
+	)
 }
 
 func setupPrettySlog() *slog.Logger {

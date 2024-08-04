@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	errs "sso/internal/domain/errors"
-	"sso/internal/domain/models"
 	def "sso/internal/services/auth"
+	"sso/internal/storage/models"
 
 	"github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
