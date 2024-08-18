@@ -16,7 +16,7 @@ type DevHandler struct {
 	attrs []slog.Attr
 }
 
-func New(
+func NewHandler(
 	out io.Writer,
 	opts *slog.HandlerOptions,
 ) *DevHandler {

@@ -3,7 +3,7 @@ package suite
 import (
 	"context"
 	"net"
-	"sso/internal/config"
+	"sso/internal/lib/config"
 	"strconv"
 	"testing"
 

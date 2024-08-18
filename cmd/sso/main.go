@@ -4,37 +4,25 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
-	"sso/internal/config"
+	"sso/internal/domain"
+	"sso/internal/lib/config"
 	"sso/internal/lib/log/handlers/dev"
-	"sso/internal/lib/log/handlers/pretty"
 	"syscall"
 
 	"sso/internal/app"
 )
 
-const (
-	envLocal = "local"
-	envDev   = "dev"
-	envProd  = "prod"
-)
-
 func main() {
 
-	// инициализация конфига
-	conf := config.MustLoad()
+	// Инициализация контекста приложения
+	ctx := domain.NewContext()
 
-	// инициализация логирования
-	log := setupLogger(conf.Env)
+	log := ctx.Log()
 
 	log.Info("start app")
 
 	// Инициализация приложения
-	application := app.New(
-		log,
-		conf.GRPC.Port,
-		conf.StoragePath,
-		conf.TokenTTL,
-	)
+	application := app.New(ctx)
 
 	// Инициализация gRPC-сервер
 	go application.GRPCServer.MustRun()
@@ -56,44 +44,19 @@ func setupLogger(env string) *slog.Logger {
 
 	switch env {
 
-	case envLocal:
-		return setupDeveloperLog()
-
-	case envDev:
+	case config.EnvDev:
 		return slog.New(
-			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
+			dev.NewHandler(
+				os.Stdout,
+				&slog.HandlerOptions{Level: slog.LevelDebug},
+			),
 		)
 
-	case envProd:
+	case config.EnvProd:
 		return slog.New(
 			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
 		)
-
-	default:
-		return slog.New(
-			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}),
-		)
-	}
-}
-
-func setupDeveloperLog() *slog.Logger {
-	return slog.New(
-		dev.New(
-			os.Stdout,
-			&slog.HandlerOptions{Level: slog.LevelDebug},
-		),
-	)
-}
-
-func setupPrettySlog() *slog.Logger {
-
-	opts := pretty.PrettyHandlerOptions{
-		SlogOpts: &slog.HandlerOptions{
-			Level: slog.LevelDebug,
-		},
 	}
 
-	handler := opts.NewPrettyHandler(os.Stdout)
-
-	return slog.New(handler)
+	return nil
 }

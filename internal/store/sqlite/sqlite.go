@@ -5,41 +5,41 @@ import (
 	"database/sql"
 	errs "sso/internal/domain/errors"
 	def "sso/internal/services/auth"
-	"sso/internal/storage/models"
+	"sso/internal/store/models"
 
 	"github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 )
 
 var (
-	_ def.UserSaver    = (*Storage)(nil)
-	_ def.UserProvider = (*Storage)(nil)
-	_ def.AppProvider  = (*Storage)(nil)
+	_ def.UserSaver    = (*Store)(nil)
+	_ def.UserProvider = (*Store)(nil)
+	_ def.AppProvider  = (*Store)(nil)
 )
 
-type Storage struct {
+type Store struct {
 	db *sql.DB
 }
 
-func New(storagePath string) (*Storage, error) {
+func New(StorePath string) (*Store, error) {
 
-	const op = "storage.sqlite.New"
+	const op = "Store.sqlite.New"
 
-	db, err := sql.Open("sqlite3", storagePath)
+	db, err := sql.Open("sqlite3", StorePath)
 	if err != nil {
 		return nil, errors.Wrap(err, op)
 	}
 
-	return &Storage{db: db}, nil
+	return &Store{db: db}, nil
 }
 
-func (s *Storage) Stop() error {
+func (s *Store) Stop() error {	
 	return s.db.Close()
 }
 
 // SaveUser saves user to db.
-func (s *Storage) SaveUser(ctx context.Context, email string, passHash []byte) (int64, error) {
-	const op = "storage.sqlite.SaveUser"
+func (s *Store) SaveUser(ctx context.Context, email string, passHash []byte) (int64, error) {
+	const op = "Store.sqlite.SaveUser"
 
 	stmt, err := s.db.Prepare("INSERT INTO users(email, pass_hash) VALUES(?, ?)")
 	if err != nil {
@@ -65,8 +65,8 @@ func (s *Storage) SaveUser(ctx context.Context, email string, passHash []byte) (
 }
 
 // User returns user by email.
-func (s *Storage) User(ctx context.Context, email string) (models.User, error) {
-	const op = "storage.sqlite.User"
+func (s *Store) User(ctx context.Context, email string) (models.User, error) {
+	const op = "Store.sqlite.User"
 
 	stmt, err := s.db.Prepare("SELECT id, email, pass_hash FROM users WHERE email = ?")
 	if err != nil {
@@ -88,8 +88,8 @@ func (s *Storage) User(ctx context.Context, email string) (models.User, error) {
 	return user, nil
 }
 
-//func (s *Storage) SavePermission(ctx context.Context, userID int64, permission models.Permission, appID string) error {
-//	const op = "storage.sqlite.SavePermission"
+//func (s *Store) SavePermission(ctx context.Context, userID int64, permission models.Permission, appID string) error {
+//	const op = "Store.sqlite.SavePermission"
 //
 //	stmt, err := s.db.Prepare("INSERT INTO permissions(user_id, permission, app_id) VALUES(?, ?, ?)")
 //	if err != nil {
@@ -105,8 +105,8 @@ func (s *Storage) User(ctx context.Context, email string) (models.User, error) {
 //}
 
 // App returns app by id.
-func (s *Storage) App(ctx context.Context, id int32) (models.App, error) {
-	const op = "storage.sqlite.App"
+func (s *Store) App(ctx context.Context, id int32) (models.App, error) {
+	const op = "Store.sqlite.App"
 
 	stmt, err := s.db.Prepare("SELECT id, name, secret FROM apps WHERE id = ?")
 	if err != nil {
@@ -128,8 +128,8 @@ func (s *Storage) App(ctx context.Context, id int32) (models.App, error) {
 	return app, nil
 }
 
-func (s *Storage) IsAdmin(ctx context.Context, userID int64) (bool, error) {
-	const op = "storage.sqlite.IsAdmin"
+func (s *Store) IsAdmin(ctx context.Context, userID int64) (bool, error) {
+	const op = "Store.sqlite.IsAdmin"
 
 	stmt, err := s.db.Prepare("SELECT is_admin FROM users WHERE id = ?")
 	if err != nil {

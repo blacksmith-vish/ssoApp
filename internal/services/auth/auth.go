@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"log/slog"
 	def "sso/internal/api/auth"
+	"sso/internal/domain"
 	errs "sso/internal/domain/errors"
 	"sso/internal/lib/jwt"
-	"sso/internal/storage/models"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -17,44 +17,20 @@ import (
 var _ def.Auth = (*Auth)(nil)
 
 type Auth struct {
-	log          *slog.Logger
-	userSaver    UserSaver
-	userProvider UserProvider
-	appProvider  AppProvider
-	tokenTTL     time.Duration
-}
-
-type UserSaver interface {
-	SaveUser(
-		ctx context.Context,
-		email string,
-		passwordHash []byte,
-	) (userID int64, err error)
-}
-
-type UserProvider interface {
-	User(ctx context.Context, email string) (models.User, error)
-	IsAdmin(ctx context.Context, userID int64) (bool, error)
-}
-
-type AppProvider interface {
-	App(ctx context.Context, appID int32) (models.App, error)
+	ctx      *domain.Context
+	store    AuthStoreProvider
+	tokenTTL time.Duration
 }
 
 // New returns a new instance of Auth
 func New(
-	log *slog.Logger,
-	userSaver UserSaver,
-	userProvider UserProvider,
-	appProvider AppProvider,
-	tokenTTL time.Duration,
+	ctx *domain.Context,
+	storeProvider AuthStoreProvider,
 ) *Auth {
 	return &Auth{
-		log:          log,
-		userSaver:    userSaver,
-		userProvider: userProvider,
-		appProvider:  appProvider,
-		tokenTTL:     tokenTTL,
+		ctx:      ctx,
+		store:    storeProvider,
+		tokenTTL: ctx.Config().TokenTTL,
 	}
 }
 
@@ -68,14 +44,14 @@ func (a *Auth) Login(
 
 	const op = "auth.Login"
 
-	log := a.log.With(
+	log := a.ctx.Log().With(
 		slog.String("op", op),
 		slog.String("email", email), // TODO email лучше не логировать
 	)
 
 	log.Info("attempting to login user")
 
-	user, err := a.userProvider.User(ctx, email)
+	user, err := a.store.userProvider.User(ctx, email)
 	if err != nil {
 
 		if errors.Is(err, errs.ErrUserNotFound) {
@@ -92,7 +68,7 @@ func (a *Auth) Login(
 		return "", fmt.Errorf("%s: %w", op, errs.ErrInvalidCredentials)
 	}
 
-	app, err := a.appProvider.App(ctx, appID)
+	app, err := a.store.appProvider.App(ctx, appID)
 	if err != nil {
 
 		if errors.Is(err, errs.ErrAppNotFound) {
@@ -123,7 +99,7 @@ func (a *Auth) RegisterNewUser(
 
 	const op = "auth.RegisterNewUser"
 
-	log := a.log.With(
+	log := a.ctx.Log().With(
 		slog.String("op", op),
 		slog.String("email", email), // TODO email лучше не логировать
 	)
@@ -136,7 +112,7 @@ func (a *Auth) RegisterNewUser(
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
-	id, err := a.userSaver.SaveUser(ctx, email, passHash)
+	id, err := a.store.userSaver.SaveUser(ctx, email, passHash)
 	if err != nil {
 
 		if errors.Is(err, errs.ErrUserExists) {
@@ -160,14 +136,14 @@ func (a *Auth) IsAdmin(
 ) (bool, error) {
 	const op = "auth.IsAdmin"
 
-	log := a.log.With(
+	log := a.ctx.Log().With(
 		slog.String("op", op),
 		slog.Int64("userID", userID),
 	)
 
 	log.Info("checking if user is admin")
 
-	isAdmin, err := a.userProvider.IsAdmin(ctx, userID)
+	isAdmin, err := a.store.userProvider.IsAdmin(ctx, userID)
 	if err != nil {
 		log.Error("error occured", slog.String("", err.Error()))
 		return false, fmt.Errorf("%s: %w", op, err)

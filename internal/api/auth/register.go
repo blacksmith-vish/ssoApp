@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *serverAPI) Register(
+func (srv *serverAPI) Register(
 	ctx context.Context,
 	request *ssov1.RegisterRequest,
 ) (*ssov1.RegisterResponse, error) {
@@ -23,7 +23,7 @@ func (s *serverAPI) Register(
 		return nil, status.Error(codes.InvalidArgument, "password required")
 	}
 
-	userID, err := s.auth.RegisterNewUser(
+	userID, err := srv.auth.RegisterNewUser(
 		ctx,
 		request.GetEmail(),
 		request.GetPassword(),
