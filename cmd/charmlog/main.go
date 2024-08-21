@@ -22,7 +22,7 @@ func (c cup) String() string {
 
 func startOven(degree int) {
 	log.Helper()
-	log.Debug("Starting oven", "temperature", degree)
+	log.Fatal("Starting oven", "temperature", degree)
 }
 
 func main() {

@@ -29,7 +29,7 @@ tasks:
 
   test:
     desc: "Tests app"
-    cmd: go test -v ./tests
+    cmd: go test -v ./internal/tests
 
   migrate-test:
     desc: "migrate test DB"

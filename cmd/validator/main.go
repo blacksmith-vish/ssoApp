@@ -71,6 +71,10 @@ func main() {
 	//validator.WithPrivateFieldValidation(),
 	)
 
+	err := validate.Var(0, "gte=1")
+
+	fmt.Println(err)
+
 	s := Some{
 		check: "rs",
 	}
@@ -93,7 +97,7 @@ func main() {
 
 	// register a custom validation for user genre on a line
 	// validates that an enum is within the interval
-	err := validate.RegisterValidation("gender_custom_validation", func(fl validator.FieldLevel) bool {
+	err = validate.RegisterValidation("gender_custom_validation", func(fl validator.FieldLevel) bool {
 		value := fl.Field().Interface().(Gender)
 		return value.String() != "unknown"
 	})

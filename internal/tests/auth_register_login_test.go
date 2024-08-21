@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"sso/tests/suite"
+	"sso/internal/tests/suite"
 	"testing"
 	"time"
 
