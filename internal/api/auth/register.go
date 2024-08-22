@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	errs "sso/internal/domain/errors"
+	apiValidator "sso/internal/lib/validators"
 
 	ssov1 "github.com/blacksmith-vish/sso/protos/gen/go/sso"
 	"google.golang.org/grpc/codes"
@@ -15,12 +16,8 @@ func (srv *serverAPI) Register(
 	request *ssov1.RegisterRequest,
 ) (*ssov1.RegisterResponse, error) {
 
-	if validate.Var(request.GetEmail(), "required,email") != nil {
-		return nil, status.Error(codes.InvalidArgument, "email required")
-	}
-
-	if validate.Var(request.GetPassword(), "required") != nil {
-		return nil, status.Error(codes.InvalidArgument, "password required")
+	if err := apiValidator.Validate(request); err != nil {
+		return nil, err
 	}
 
 	userID, err := srv.auth.RegisterNewUser(
@@ -35,7 +32,13 @@ func (srv *serverAPI) Register(
 		return nil, status.Error(codes.Internal, "login failed")
 	}
 
-	return &ssov1.RegisterResponse{
+	response := &ssov1.RegisterResponse{
 		UserId: userID,
-	}, nil
+	}
+
+	if err := apiValidator.Validate(response); err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }

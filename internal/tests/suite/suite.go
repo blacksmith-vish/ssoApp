@@ -27,7 +27,7 @@ func New(t *testing.T) (context.Context, *Suite) {
 	t.Helper()
 	t.Parallel()
 
-	conf := config.MustLoadByPath("../config/local.yaml")
+	conf := config.MustLoadByPath("../../config/local.yaml")
 
 	ctx, cancelCtx := context.WithTimeout(context.Background(), conf.GRPC.Timeout)
 

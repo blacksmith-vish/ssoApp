@@ -4,18 +4,12 @@ import (
 	"context"
 
 	ssov1 "github.com/blacksmith-vish/sso/protos/gen/go/sso"
-	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc"
 )
 
 var (
-	_        ssov1.AuthServer = (*serverAPI)(nil)
-	validate *validator.Validate
+	_ ssov1.AuthServer = (*serverAPI)(nil)
 )
-
-func init() {
-	validate = validator.New(validator.WithRequiredStructEnabled())
-}
 
 type Auth interface {
 	Login(

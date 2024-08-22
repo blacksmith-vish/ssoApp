@@ -13,10 +13,6 @@ type App struct {
 
 func New(
 	ctx *domain.Context,
-	// log *slog.Logger,
-	// grpcPort int,
-	// storagePath string,
-	// tokenTTL time.Duration,
 ) *App {
 
 	// Инициализация хранилища
@@ -34,7 +30,7 @@ func New(
 	// Инициализация auth сервиса
 	authService := auth.New(ctx, *authStoreProvider)
 
-	grpcapp := grpcApp.New(ctx.Log(), authService, ctx.Config().GRPC.Port)
+	grpcapp := grpcApp.New(ctx, authService)
 
 	return &App{
 		GRPCServer: grpcapp,

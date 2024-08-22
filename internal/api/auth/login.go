@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	errs "sso/internal/domain/errors"
+	apiValidator "sso/internal/lib/validators"
 
 	ssov1 "github.com/blacksmith-vish/sso/protos/gen/go/sso"
 	"google.golang.org/grpc/codes"
@@ -15,16 +16,8 @@ func (s *serverAPI) Login(
 	request *ssov1.LoginRequest,
 ) (*ssov1.LoginResponse, error) {
 
-	if validate.Var(request.GetEmail(), "required,email") != nil {
-		return nil, status.Error(codes.InvalidArgument, "email required")
-	}
-
-	if validate.Var(request.GetPassword(), "required") != nil {
-		return nil, status.Error(codes.InvalidArgument, "password required")
-	}
-
-	if validate.Var(request.GetAppId(), "gte=0") != nil {
-		return nil, status.Error(codes.InvalidArgument, "app_id required")
+	if err := apiValidator.Validate(request); err != nil {
+		return nil, err
 	}
 
 	token, err := s.auth.Login(
@@ -42,7 +35,13 @@ func (s *serverAPI) Login(
 		return nil, status.Error(codes.Internal, "login failed")
 	}
 
-	return &ssov1.LoginResponse{
+	response := &ssov1.LoginResponse{
 		Token: token,
-	}, nil
+	}
+
+	if err := apiValidator.Validate(response); err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }

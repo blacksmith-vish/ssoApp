@@ -2,8 +2,11 @@ package auth
 
 import (
 	"context"
-	"errors"
 	errs "sso/internal/domain/errors"
+
+	"github.com/pkg/errors"
+
+	apiValidator "sso/internal/lib/validators"
 
 	ssov1 "github.com/blacksmith-vish/sso/protos/gen/go/sso"
 	"google.golang.org/grpc/codes"
@@ -15,14 +18,15 @@ func (s *serverAPI) IsAdmin(
 	request *ssov1.IsAdminRequest,
 ) (*ssov1.IsAdminResponse, error) {
 
-	if validate.Var(request.GetUserId(), "gte=0") != nil {
-		return nil, status.Error(codes.InvalidArgument, "app_id required")
+	if err := apiValidator.Validate(request); err != nil {
+		return nil, err
 	}
 
 	isAdmin, err := s.auth.IsAdmin(
 		ctx,
 		request.GetUserId(),
 	)
+
 	if err != nil {
 		if errors.Is(err, errs.ErrUserNotFound) {
 			return nil, status.Error(codes.AlreadyExists, "login failed")
@@ -30,7 +34,13 @@ func (s *serverAPI) IsAdmin(
 		return nil, status.Error(codes.Internal, "login failed")
 	}
 
-	return &ssov1.IsAdminResponse{
+	response := &ssov1.IsAdminResponse{
 		IsAdmin: isAdmin,
-	}, nil
+	}
+
+	if err := apiValidator.Validate(response); err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
