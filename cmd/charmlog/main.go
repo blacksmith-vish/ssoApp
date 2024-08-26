@@ -27,9 +27,11 @@ func startOven(degree int) {
 
 func main() {
 
-	lgr := log.New(os.Stdout)
+	lgr := log.NewWithOptions(os.Stderr,
+		log.Options{
+			Formatter: log.LogfmtFormatter,
+		})
 
-	lgr.SetFormatter(log.JSONFormatter)
 	lgr.SetLevel(log.DebugLevel)
 
 	lgr.Debug("SOME SHIT")
