@@ -11,6 +11,7 @@ var (
 	_ ssov1.AuthServer = (*serverAPI)(nil)
 )
 
+//go:generate go run github.com/vektra/mockery/v2@v2.20.2 --name=Auth
 type Auth interface {
 	Login(
 		ctx context.Context,
