@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"log"
 	"testing"
+	"time"
 
 	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlserver"
 
-	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 
@@ -21,17 +22,18 @@ import (
 
 const (
 	host     = "localhost"
-	user     = "postgres"
-	password = "postgres"
+	user     = "sa"
+	password = "Lnxpass1"
 	dbName   = "db_test"
 	port     = "5437"
-	dsn      = "host=%s port=%s user=%s password=%s dbname=%s sslmode=disable timezone=UTC connect_timeout=30"
 
-	migrationPath = "./migrations"
+	driver = "sqlserver"
+
+	migrationPath = "./migrations_sqlserver"
 )
 
 var (
-	dsnConnString = fmt.Sprintf(dsn, host, port, user, password, dbName)
+	dsnConnString = fmt.Sprintf("%s://%s:%s@%s:%s", driver, user, password, host, port)
 )
 
 type storeTestSuite struct {
@@ -55,22 +57,21 @@ func (suite *storeTestSuite) SetupSuite() {
 
 	err = createDatabaseContainer(suite)
 	if err != nil {
-		suite.dbContainer.Purge(suite.resource)
+		_ = suite.dbContainer.Purge(suite.resource)
 		log.Fatal(err)
 	}
 
 	// err = suite.createScheme()
 	// if err != nil {
-	// 	suite.dbContainer.Purge(suite.resource)
+	// 	_ = suite.dbContainer.Purge(suite.resource)
 	// 	log.Fatal(err)
 	// }
 
 	err = suite.migrateDB()
 	if err != nil {
-		suite.dbContainer.Purge(suite.resource)
+		_ = suite.dbContainer.Purge(suite.resource)
 		log.Fatal(err)
 	}
-
 }
 
 func (suite *storeTestSuite) TearDownSuite() {
@@ -87,17 +88,16 @@ func createDatabaseContainer(suite *storeTestSuite) error {
 	}
 
 	opts := dockertest.RunOptions{
-		Name:       "postgres-test",
-		Repository: "postgres",
-		Tag:        "14.5", // same as docker compose
+		Name:       "mssql-test",
+		Repository: "mcr.microsoft.com/mssql/server",
+		Tag:        "2019-latest",
 		Env: []string{
-			"POSTGRES_USER=" + user,
-			"POSTGRES_PASSWORD=" + password,
-			"POSTGRES_DB=" + dbName,
+			"ACCEPT_EULA=Y",
+			"MSSQL_SA_PASSWORD=" + password,
 		},
-		ExposedPorts: []string{"5432"},
+		ExposedPorts: []string{"1433"},
 		PortBindings: map[docker.Port][]docker.PortBinding{
-			"5432": {
+			"1433/tcp": {
 				{HostIP: "0.0.0.0", HostPort: port},
 			},
 		},
@@ -105,14 +105,19 @@ func createDatabaseContainer(suite *storeTestSuite) error {
 
 	suite.resource, err = pool.RunWithOptions(&opts)
 	if err != nil {
+		_ = pool.Purge(suite.resource)
 		return errors.Wrap(err, "could not start resource")
 	}
 
+	pool.MaxWait = time.Second * 60
+
 	if err := pool.Retry(func() error {
 		var err error
-		suite.testDB, err = sqlx.Connect("postgres", dsnConnString)
+		suite.testDB, err = sqlx.Connect(driver, dsnConnString)
 		if err != nil {
-			log.Println("Error:", err)
+			if err.Error() != "EOF" {
+				log.Println("Error:", err)
+			}
 			return err
 		}
 		return suite.testDB.Ping()
@@ -148,7 +153,7 @@ func (suite *storeTestSuite) createScheme() error {
 
 func (suite *storeTestSuite) migrateDB() error {
 
-	driver, err := postgres.WithInstance(suite.testDB.DB, &postgres.Config{})
+	driver, err := sqlserver.WithInstance(suite.testDB.DB, &sqlserver.Config{})
 	if err != nil {
 		return errors.Wrap(err, "unable to create db instance")
 	}
@@ -160,7 +165,7 @@ func (suite *storeTestSuite) migrateDB() error {
 		return errors.Wrap(err, "unable to get source")
 	}
 
-	m, err := migrate.NewWithInstance("migration_embeded_sql_files", SrcDriver, "psql_db", driver)
+	m, err := migrate.NewWithInstance("migration_embeded_sql_files", SrcDriver, dbName, driver)
 	if err != nil {
 		return errors.Wrap(err, "failed to init migrate")
 	}
