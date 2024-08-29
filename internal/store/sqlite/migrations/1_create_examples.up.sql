@@ -7,8 +7,3 @@ INSERT INTO
     examples (text)
 VALUES
     ('val1'), ('val2'), ('val3');
-
-SELECT
-    *
-FROM
-    examples;
