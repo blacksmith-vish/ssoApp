@@ -11,7 +11,7 @@ func (suite *storeTestSuite) TestPingDB() {
 
 	t := suite.T()
 
-	t.Run("TestPingDB", func(t *testing.T) {
+	t.Run("ping DB, should be no error", func(t *testing.T) {
 		err := suite.testDB.Ping()
 		if err != nil {
 			t.Error("can't ping database")
@@ -29,7 +29,7 @@ func (suite *storeTestSuite) TestSelect() {
 
 	t := suite.T()
 
-	t.Run("TestSelect", func(t *testing.T) {
+	t.Run("select & check result from examples", func(t *testing.T) {
 		m := make([]examples, 0)
 		err := suite.testDB.Select(
 			&m,
