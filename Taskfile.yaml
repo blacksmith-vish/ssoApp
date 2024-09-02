@@ -1,5 +1,10 @@
 version: "3"
 
+dotenv: ['.env']
+
+vars:
+  FLAG_CONFIG: --config=$CONFIG_PATH
+
 tasks:
   
   init:
@@ -9,7 +14,7 @@ tasks:
 
   run:
     desc: "Run main application"
-    cmd: go run ./cmd/sso --config=./config/local.yaml
+    cmd: go run ./cmd/sso {{.FLAG_CONFIG}}
 
   ctx:
     desc: "Run ctx application"
@@ -25,7 +30,8 @@ tasks:
 
   migrate:
     desc: "migrate DB"
-    cmd: go run ./cmd/migrator --storage-path=./storage/sso.db --migrations-path=./migrations
+    cmds:
+      - go run ./cmd/migrator --storage-path=$STORE_PATH --migrations-path=./migrations
 
   test:
     desc: "Tests app"
@@ -33,7 +39,7 @@ tasks:
 
   migrate-test:
     desc: "migrate test DB"
-    cmd: go run ./cmd/migrator --storage-path=./storage/sso.db --migrations-path=./tests/migrations --migrations-table=migrations_test
+    cmd: go run ./cmd/migrator --storage-path=$STORE_PATH --migrations-path=./tests/migrations --migrations-table=migrations_test
 
   build:
     desc: "Builds application"
@@ -48,7 +54,7 @@ tasks:
     deps: [build]
     silent: true
     watch: true
-    cmd: ./bin/main --config=./config/local.yaml
+    cmd: ./bin/main {{.FLAG_CONFIG}}
     sources: 
       - ./*.go,
       - ./**/*.go
