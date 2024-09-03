@@ -65,5 +65,9 @@ func fetchConfigPath() string {
 		res = os.Getenv("CONFIG_PATH")
 	}
 
+	if res == "" {
+		res = "C:/Users/nikku/go/src/ssoApp/config/local.yaml"
+	}
+
 	return res
 }

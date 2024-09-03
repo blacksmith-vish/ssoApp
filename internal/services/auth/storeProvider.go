@@ -11,6 +11,7 @@ type AuthStoreProvider struct {
 	appProvider  AppProvider
 }
 
+//go:generate go run github.com/vektra/mockery/v2@v2.45.0 --name=UserSaver
 type UserSaver interface {
 	SaveUser(
 		ctx context.Context,
@@ -19,11 +20,13 @@ type UserSaver interface {
 	) (userID int64, err error)
 }
 
+//go:generate go run github.com/vektra/mockery/v2@v2.45.0 --name=UserProvider
 type UserProvider interface {
 	User(ctx context.Context, email string) (models.User, error)
 	IsAdmin(ctx context.Context, userID int64) (bool, error)
 }
 
+//go:generate go run github.com/vektra/mockery/v2@v2.45.0 --name=AppProvider
 type AppProvider interface {
 	App(ctx context.Context, appID int32) (models.App, error)
 }
