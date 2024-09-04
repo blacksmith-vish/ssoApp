@@ -13,7 +13,7 @@ import (
 func main() {
 
 	// Инициализация контекста приложения
-	ctx := domain.NewContext()
+	ctx := domain.NewContextWithOpts()
 
 	log := ctx.Log()
 

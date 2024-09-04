@@ -18,14 +18,14 @@ var _ def.Auth = (*Auth)(nil)
 
 type Auth struct {
 	ctx      *domain.Context
-	store    AuthStoreProvider
+	store    *AuthStoreProvider
 	tokenTTL time.Duration
 }
 
 // New returns a new instance of Auth
 func New(
 	ctx *domain.Context,
-	storeProvider AuthStoreProvider,
+	storeProvider *AuthStoreProvider,
 ) *Auth {
 	return &Auth{
 		ctx:      ctx,

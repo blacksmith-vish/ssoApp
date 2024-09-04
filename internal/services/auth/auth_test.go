@@ -2,7 +2,10 @@ package auth
 
 import (
 	"context"
+	"io"
+	"log/slog"
 	"sso/internal/domain"
+	"sso/internal/lib/config"
 	"sso/internal/services/auth/mocks"
 	"testing"
 
@@ -35,8 +38,11 @@ func TestMaxWidth(t *testing.T) {
 				Return(false, nil)
 
 			service := New(
-				domain.NewContext(),
-				*NewStoreProvider(
+				domain.NewContext(
+					slog.New(slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelInfo})),
+					config.MustLoadByPath("../../../config/local.yaml"),
+				),
+				NewStoreProvider(
 					userSaver,
 					userProvider,
 					appProvider,

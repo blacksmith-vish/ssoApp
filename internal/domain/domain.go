@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"io"
 	"log/slog"
 	"os"
 	"sso/internal/lib/config"
@@ -19,14 +20,14 @@ type optsFunc func(*Context)
 func defaultOpts() *Context {
 	conf := config.MustLoad()
 	return &Context{
-		conf: conf,
 		log:  setupLogger(conf.Env),
+		conf: conf,
 	}
 }
 
 // NewContext Возвращает новую структуру Context
 // Принимает функции для задания опций в любом количестве
-func NewContext(
+func NewContextWithOpts(
 	opts ...optsFunc,
 ) *Context {
 	o := defaultOpts()
@@ -34,6 +35,18 @@ func NewContext(
 		opt(o)
 	}
 	return o
+}
+
+func NewContext(
+	Log *slog.Logger,
+	Config *config.Config,
+) *Context {
+
+	return &Context{
+		log:  Log,
+		conf: Config,
+	}
+
 }
 
 func (ctx *Context) Log() *slog.Logger {
@@ -60,6 +73,12 @@ func setupLogger(env string) *slog.Logger {
 		return slog.New(
 			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
 		)
+
+	case config.EnvTest:
+		return slog.New(
+			slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelInfo}),
+		)
+
 	}
 
 	return nil

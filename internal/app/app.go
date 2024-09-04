@@ -28,7 +28,7 @@ func New(
 	)
 
 	// Инициализация auth сервиса
-	authService := auth.New(ctx, *authStoreProvider)
+	authService := auth.New(ctx, authStoreProvider)
 
 	grpcapp := grpcApp.New(ctx, authService)
 

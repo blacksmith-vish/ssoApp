@@ -11,6 +11,7 @@ import (
 const (
 	EnvDev  = "dev"
 	EnvProd = "prod"
+	EnvTest = "test"
 )
 
 type Config struct {
@@ -63,10 +64,6 @@ func fetchConfigPath() string {
 
 	if len(res) == 0 {
 		res = os.Getenv("CONFIG_PATH")
-	}
-
-	if res == "" {
-		res = "C:/Users/nikku/go/src/ssoApp/config/local.yaml"
 	}
 
 	return res
