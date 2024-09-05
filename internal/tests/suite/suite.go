@@ -36,8 +36,7 @@ func New(t *testing.T) (context.Context, *Suite) {
 		cancelCtx()
 	})
 
-	cc, err := grpc.DialContext(
-		context.Background(),
+	cc, err := grpc.NewClient(
 		grpcAddress(conf),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
