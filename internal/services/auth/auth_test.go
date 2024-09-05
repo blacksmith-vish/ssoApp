@@ -7,6 +7,7 @@ import (
 	"sso/internal/domain"
 	"sso/internal/lib/config"
 	"sso/internal/services/auth/mocks"
+	"sso/internal/store/models"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,44 +18,83 @@ func TestMaxWidth(t *testing.T) {
 
 	TestingTable := []struct {
 		name string
-		args []string // аргументы
-		want int      // ожидаемое значение
+		arg  int64 // аргументы
+		want struct {
+			result bool
+			err    bool
+		} // ожидаемое значение
 	}{
 		{
-			name: "sd",
+			name: "test-1",
+			arg:  0,
+			want: struct {
+				result bool
+				err    bool
+			}{
+				result: false,
+				err:    false,
+			},
+		},
+		{
+			name: "test-2",
+			arg:  2,
+			want: struct {
+				result bool
+				err    bool
+			}{
+				result: true,
+				err:    false,
+			},
+		},
+		{
+			name: "test-3",
+			arg:  -1,
+			want: struct {
+				result bool
+				err    bool
+			}{
+				result: false,
+				err:    true,
+			},
 		},
 	}
+
+	userSaver := mocks.NewUserSaver(t)
+	userProvider := mocks.NewUserProvider(t)
+	appProvider := mocks.NewAppProvider(t)
+
+	userProvider.
+		On("IsAdmin", mock.Anything, int64(0)).
+		Return(false, nil).
+		On("IsAdmin", mock.Anything, int64(2)).
+		Return(true, nil).
+		On("IsAdmin", mock.Anything, int64(-1)).
+		Return(false, models.ErrUserNotFound)
+
+	service := New(
+		domain.NewContext(
+			slog.New(slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelInfo})),
+			config.MustLoadByPath("../../../config/local.yaml"),
+		),
+		NewStoreProvider(
+			userSaver,
+			userProvider,
+			appProvider,
+		),
+	)
 
 	for _, tt := range TestingTable {
 
 		t.Run(tt.name, func(t *testing.T) {
+			isAdmin, err := service.IsAdmin(context.TODO(), tt.arg)
 
-			userSaver := mocks.NewUserSaver(t)
-			userProvider := mocks.NewUserProvider(t)
-			appProvider := mocks.NewAppProvider(t)
+			if tt.want.err {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+			}
 
-			userProvider.
-				On("IsAdmin", mock.Anything, int64(0)).
-				Return(false, nil)
-
-			service := New(
-				domain.NewContext(
-					slog.New(slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelInfo})),
-					config.MustLoadByPath("../../../config/local.yaml"),
-				),
-				NewStoreProvider(
-					userSaver,
-					userProvider,
-					appProvider,
-				),
-			)
-
-			isAdmin, err := service.IsAdmin(context.TODO(), 0)
-
-			assert.Nil(t, err)
-
-			assert.False(t, isAdmin)
-
+			assert.Equal(t, tt.want.result, isAdmin)
 		})
 	}
 
