@@ -21,8 +21,8 @@ func (suite *storeTestSuite) TestPingDB() {
 }
 
 type examples struct {
-	ID   int64
 	Text string
+	ID   int64
 }
 
 func (suite *storeTestSuite) TestSelect() {

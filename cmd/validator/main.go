@@ -43,11 +43,11 @@ func (gender Gender) String() string {
 type User struct {
 	FirstName      string     `json:"fname"`
 	LastName       string     `json:"lname"`
-	Age            uint8      `validate:"gte=0,lte=130"`
 	Email          string     `json:"e-mail" validate:"required,email"`
 	FavouriteColor string     `validate:"hexcolor|rgb|rgba"`
-	Addresses      []*Address `validate:"required,dive,required"` // a person can have a home and cottage...
+	Addresses      []*Address `validate:"required,dive,required"`
 	Gender         Gender     `json:"gender" validate:"required,gender_custom_validation"`
+	Age            uint8      `validate:"gte=0,lte=130"`
 }
 
 // Address houses a users address information
