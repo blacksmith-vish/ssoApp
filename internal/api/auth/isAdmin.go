@@ -4,6 +4,7 @@ import (
 	"context"
 	errs "sso/internal/domain/errors"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 
 	apiValidator "sso/internal/lib/validators"
@@ -13,16 +14,23 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *serverAPI) IsAdmin(
+func (srv *serverAPI) IsAdmin(
 	ctx context.Context,
 	request *ssov1.IsAdminRequest,
 ) (*ssov1.IsAdminResponse, error) {
+
+	validate := validator.New()
+
+	err := validate.Var(request.GetUserId(), "gte=0")
+	if err != nil {
+		return nil, err
+	}
 
 	if err := apiValidator.Validate(request); err != nil {
 		return nil, err
 	}
 
-	isAdmin, err := s.auth.IsAdmin(
+	isAdmin, err := srv.auth.IsAdmin(
 		ctx,
 		request.GetUserId(),
 	)
