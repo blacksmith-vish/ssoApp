@@ -21,7 +21,7 @@ func (a *Authentication) IsAdmin(
 
 	log.Info("checking if user is admin")
 
-	isAdmin, err := a.store.userProvider.IsAdmin(ctx, request.UserID)
+	isAdmin, err := a.userProvider.IsAdmin(ctx, request.UserID)
 	if err != nil {
 		log.Error("error occured", slog.String("", err.Error()))
 		return models.IsAdminResponse{

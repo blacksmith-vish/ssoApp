@@ -27,7 +27,7 @@ func (a *Authentication) Login(
 
 	log.Info("attempting to login user")
 
-	user, err := a.store.userProvider.User(ctx, request.Email)
+	user, err := a.userProvider.User(ctx, request.Email)
 	if err != nil {
 
 		if errors.Is(err, errs.ErrUserNotFound) {
@@ -45,7 +45,7 @@ func (a *Authentication) Login(
 		return models.LoginResponse{}, errors.Wrap(errs.ErrInvalidCredentials, op)
 	}
 
-	app, err := a.store.appProvider.App(ctx, request.AppID)
+	app, err := a.appProvider.App(ctx, request.AppID)
 	if err != nil {
 
 		if errors.Is(err, errs.ErrAppNotFound) {

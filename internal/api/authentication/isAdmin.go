@@ -33,14 +33,6 @@ func (srv *server) IsAdmin(
 		return nil, status.Error(codes.InvalidArgument, "login failed")
 	}
 
-	validate := validator.New()
-
-	err := validate.Var(request.GetUserId(), "required,uuid4")
-	if err != nil {
-		log.Error("validation failed", "err", err.Error())
-		return nil, status.Error(codes.InvalidArgument, "login failed")
-	}
-
 	serviceResponse, err := srv.auth.IsAdmin(
 		ctx,
 		serviceRequest,

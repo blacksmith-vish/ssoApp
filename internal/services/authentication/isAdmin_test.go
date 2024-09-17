@@ -72,16 +72,14 @@ func TestMaxWidth(t *testing.T) {
 		On("IsAdmin", mock.Anything, "-1").
 		Return(false, storeModels.ErrUserNotFound)
 
-	service := New(
+	service := NewService(
 		domain.NewContext(
 			slog.New(slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelInfo})),
 			config.MustLoadByPath("../../../config/local.yaml"),
 		),
-		NewAuthenticationStoreProvider(
-			userSaver,
-			userProvider,
-			appProvider,
-		),
+		userSaver,
+		userProvider,
+		appProvider,
 	)
 
 	for _, tt := range TestingTable {

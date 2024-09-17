@@ -21,14 +21,13 @@ func New(
 		panic(err)
 	}
 
-	authStoreProvider := authentication.NewAuthenticationStoreProvider(
+	// Инициализация auth сервиса
+	authService := authentication.NewService(
+		ctx,
 		storage,
 		storage,
 		storage,
 	)
-
-	// Инициализация auth сервиса
-	authService := authentication.New(ctx, authStoreProvider)
 
 	grpcapp := grpcApp.New(ctx, authService)
 
