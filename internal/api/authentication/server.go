@@ -27,24 +27,22 @@ type Authentication interface {
 	) (isAdmin bool, err error)
 }
 
-type authenticationServerAPI struct {
+type authenticationAPI struct {
 	sso.UnimplementedAuthenticationServer
 	ctx  *domain.Context
 	auth Authentication
 }
 
+type server = authenticationAPI
+
 func NewAuthenticationServer(
 	ctx *domain.Context,
 	auth Authentication,
-) *authenticationServerAPI {
+) *authenticationAPI {
 
-	return &authenticationServerAPI{
+	return &authenticationAPI{
 		ctx:  ctx,
 		auth: auth,
 	}
 
 }
-
-// func Register(gRPC *grpc.Server, auth Auth) {
-// 	sso.RegisterAuthenticationServer(gRPC, &serverAPI{auth: auth})
-// }

@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (srv *authenticationServerAPI) Register(
+func (srv *server) Register(
 	ctx context.Context,
 	request *sso.RegisterRequest,
 ) (*sso.RegisterResponse, error) {

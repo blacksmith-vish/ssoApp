@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (srv *authenticationServerAPI) Login(
+func (srv *server) Login(
 	ctx context.Context,
 	request *sso.LoginRequest,
 ) (*sso.LoginResponse, error) {

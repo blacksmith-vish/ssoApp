@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"log/slog"
 	errs "sso/internal/domain/errors"
 
 	"github.com/go-playground/validator/v10"
@@ -12,17 +13,31 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (srv *authenticationServerAPI) IsAdmin(
+func (srv *server) IsAdmin(
 	ctx context.Context,
 	request *sso.IsAdminRequest,
 ) (*sso.IsAdminResponse, error) {
 
+	log := srv.ctx.Log().With(
+		slog.String("op", sso.Authentication_IsAdmin_FullMethodName),
+		slog.String("userID", request.GetUserId()),
+	)
+
 	validate := validator.New()
 
-	err := validate.Var(request.GetUserId(), "gte=0")
+	err := validate.Var(request.GetUserId(), "required,uuid4")
 	if err != nil {
-		return nil, err
+		log.Error("validation failed", "err", err.Error())
+		return nil, status.Error(codes.InvalidArgument, "login failed")
 	}
+
+	log.Debug("validation failed", "err",
+		[]string{
+			"shit1",
+			"shit2",
+			"shit3",
+		},
+	)
 
 	isAdmin, err := srv.auth.IsAdmin(
 		ctx,
