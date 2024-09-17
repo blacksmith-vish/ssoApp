@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"testing"
 
-	ssov1 "github.com/blacksmith-vish/sso/protos/gen/go/sso"
+	"github.com/blacksmith-vish/sso/gen/go/sso"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -19,7 +19,7 @@ const (
 type Suite struct {
 	*testing.T
 	Conf       *config.Config
-	AuthClient ssov1.AuthClient
+	AuthClient sso.AuthenticationClient
 }
 
 func New(t *testing.T) (context.Context, *Suite) {
@@ -47,7 +47,7 @@ func New(t *testing.T) (context.Context, *Suite) {
 	return ctx, &Suite{
 		T:          t,
 		Conf:       conf,
-		AuthClient: ssov1.NewAuthClient(cc),
+		AuthClient: sso.NewAuthenticationClient(cc),
 	}
 
 }

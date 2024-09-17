@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
-	authgrpc "sso/internal/api/auth"
+	authenticationGRPC "sso/internal/api/authentication"
 	"sso/internal/domain"
 
+	"github.com/blacksmith-vish/sso/gen/go/sso"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
@@ -19,12 +20,20 @@ type App struct {
 
 func New(
 	ctx *domain.Context,
-	authService authgrpc.Auth,
+	authService authenticationGRPC.Authentication,
 ) *App {
 
 	gRPCServer := grpc.NewServer()
 
-	authgrpc.Register(gRPCServer, authService)
+	sso.RegisterAuthenticationServer(
+		gRPCServer,
+		authenticationGRPC.NewAuthenticationServer(
+			ctx,
+			authService,
+		),
+	)
+
+	//	authenticationGRPC.Register(gRPCServer, authService)
 
 	return &App{
 		ctx:        ctx,

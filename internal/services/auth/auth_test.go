@@ -18,7 +18,7 @@ func TestMaxWidth(t *testing.T) {
 
 	TestingTable := []struct {
 		name string
-		arg  int64 // аргументы
+		arg  string // аргументы
 		want struct {
 			result bool
 			err    bool
@@ -26,7 +26,7 @@ func TestMaxWidth(t *testing.T) {
 	}{
 		{
 			name: "test-1",
-			arg:  0,
+			arg:  "0",
 			want: struct {
 				result bool
 				err    bool
@@ -37,7 +37,7 @@ func TestMaxWidth(t *testing.T) {
 		},
 		{
 			name: "test-2",
-			arg:  2,
+			arg:  "2",
 			want: struct {
 				result bool
 				err    bool
@@ -48,7 +48,7 @@ func TestMaxWidth(t *testing.T) {
 		},
 		{
 			name: "test-3",
-			arg:  -1,
+			arg:  "-1",
 			want: struct {
 				result bool
 				err    bool
@@ -64,11 +64,11 @@ func TestMaxWidth(t *testing.T) {
 	appProvider := mocks.NewAppProvider(t)
 
 	userProvider.
-		On("IsAdmin", mock.Anything, int64(0)).
+		On("IsAdmin", mock.Anything, "0").
 		Return(false, nil).
-		On("IsAdmin", mock.Anything, int64(2)).
+		On("IsAdmin", mock.Anything, "2").
 		Return(true, nil).
-		On("IsAdmin", mock.Anything, int64(-1)).
+		On("IsAdmin", mock.Anything, "-1").
 		Return(false, models.ErrUserNotFound)
 
 	service := New(
@@ -76,7 +76,7 @@ func TestMaxWidth(t *testing.T) {
 			slog.New(slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelInfo})),
 			config.MustLoadByPath("../../../config/local.yaml"),
 		),
-		NewStoreProvider(
+		NewAuthenticationStoreProvider(
 			userSaver,
 			userProvider,
 			appProvider,

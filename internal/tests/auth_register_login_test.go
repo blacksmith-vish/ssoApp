@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	ssov1 "github.com/blacksmith-vish/sso/protos/gen/go/sso"
+	"github.com/blacksmith-vish/sso/gen/go/sso"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	emptyAppID = iota
-	appID
+	emptyAppID = "iota"
+	appID      = "iotafull"
 
 	appSecret = "secret"
 
@@ -28,7 +28,7 @@ func TestRegisterLogin_Login_HappyPass(t *testing.T) {
 
 	password := randomPassword()
 
-	responseRegister, err := st.AuthClient.Register(ctx, &ssov1.RegisterRequest{
+	responseRegister, err := st.AuthClient.Register(ctx, &sso.RegisterRequest{
 		Email:    email,
 		Password: password,
 	})
@@ -37,7 +37,7 @@ func TestRegisterLogin_Login_HappyPass(t *testing.T) {
 
 	assert.NotEmpty(t, responseRegister.GetUserId())
 
-	responseLogin, err := st.AuthClient.Login(ctx, &ssov1.LoginRequest{
+	responseLogin, err := st.AuthClient.Login(ctx, &sso.LoginRequest{
 		Email:    email,
 		Password: password,
 		AppId:    appID,
@@ -50,7 +50,7 @@ func TestRegisterLogin_Login_HappyPass(t *testing.T) {
 	token := responseLogin.GetToken()
 	require.NotEmpty(t, token)
 
-	tokenParsed, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+	tokenParsed, err := jwt.Parse(token, func(t *jwt.Token) (any, error) {
 		return []byte(appSecret), nil
 	})
 
@@ -59,9 +59,9 @@ func TestRegisterLogin_Login_HappyPass(t *testing.T) {
 	claims, ok := tokenParsed.Claims.(jwt.MapClaims)
 	assert.True(t, ok)
 
-	assert.Equal(t, responseRegister.GetUserId(), int64(claims["userID"].(float64)))
+	assert.Equal(t, responseRegister.GetUserId(), claims["userID"].(string))
 	assert.Equal(t, email, claims["email"].(string))
-	assert.Equal(t, appID, int(claims["appID"].(float64)))
+	assert.Equal(t, appID, claims["appID"].(string))
 
 	const deltaSeconds = 1
 

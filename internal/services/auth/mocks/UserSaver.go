@@ -14,22 +14,22 @@ type UserSaver struct {
 }
 
 // SaveUser provides a mock function with given fields: ctx, email, passwordHash
-func (_m *UserSaver) SaveUser(ctx context.Context, email string, passwordHash []byte) (int64, error) {
+func (_m *UserSaver) SaveUser(ctx context.Context, email string, passwordHash []byte) (string, error) {
 	ret := _m.Called(ctx, email, passwordHash)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SaveUser")
 	}
 
-	var r0 int64
+	var r0 string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, []byte) (int64, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, []byte) (string, error)); ok {
 		return rf(ctx, email, passwordHash)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, []byte) int64); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, []byte) string); ok {
 		r0 = rf(ctx, email, passwordHash)
 	} else {
-		r0 = ret.Get(0).(int64)
+		r0 = ret.Get(0).(string)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string, []byte) error); ok {

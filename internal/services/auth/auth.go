@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	def "sso/internal/api/auth"
 	"sso/internal/domain"
 	errs "sso/internal/domain/errors"
 	"sso/internal/lib/jwt"
@@ -14,20 +13,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var _ def.Auth = (*Auth)(nil)
-
-type Auth struct {
+type Authentication struct {
 	ctx      *domain.Context
-	store    *AuthStoreProvider
+	store    *AuthenticationStoreProvider
 	tokenTTL time.Duration
 }
 
 // New returns a new instance of Auth
 func New(
 	ctx *domain.Context,
-	storeProvider *AuthStoreProvider,
-) *Auth {
-	return &Auth{
+	storeProvider *AuthenticationStoreProvider,
+) *Authentication {
+	return &Authentication{
 		ctx:      ctx,
 		store:    storeProvider,
 		tokenTTL: ctx.Config().TokenTTL,
@@ -35,11 +32,11 @@ func New(
 }
 
 // Login checks if user's credentials exists
-func (a *Auth) Login(
+func (a *Authentication) Login(
 	ctx context.Context,
 	email string,
 	password string,
-	appID int32,
+	appID string,
 ) (string, error) {
 
 	const op = "auth.Login"
@@ -91,11 +88,11 @@ func (a *Auth) Login(
 	return token, nil
 }
 
-func (a *Auth) RegisterNewUser(
+func (a *Authentication) RegisterNewUser(
 	ctx context.Context,
 	email string,
 	password string,
-) (userID int64, err error) {
+) (userID string, err error) {
 
 	const op = "auth.RegisterNewUser"
 
@@ -109,7 +106,7 @@ func (a *Auth) RegisterNewUser(
 	passHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Error("failed to generate pass hash", slog.String("", err.Error()))
-		return 0, fmt.Errorf("%s: %w", op, err)
+		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	id, err := a.store.userSaver.SaveUser(ctx, email, passHash)
@@ -117,11 +114,11 @@ func (a *Auth) RegisterNewUser(
 
 		if errors.Is(err, errs.ErrUserExists) {
 			log.Warn("user exists", slog.String("", err.Error()))
-			return 0, fmt.Errorf("%s: %w", op, errs.ErrUserExists)
+			return "", fmt.Errorf("%s: %w", op, errs.ErrUserExists)
 		}
 
 		log.Error("failed to save user", slog.String("", err.Error()))
-		return 0, fmt.Errorf("%s: %w", op, err)
+		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	log.Info("user registered")
@@ -130,15 +127,15 @@ func (a *Auth) RegisterNewUser(
 
 }
 
-func (a *Auth) IsAdmin(
+func (a *Authentication) IsAdmin(
 	ctx context.Context,
-	userID int64,
+	userID string,
 ) (bool, error) {
 	const op = "auth.IsAdmin"
 
 	log := a.ctx.Log().With(
 		slog.String("op", op),
-		slog.Int64("userID", userID),
+		slog.String("userID", userID),
 	)
 
 	log.Info("checking if user is admin")

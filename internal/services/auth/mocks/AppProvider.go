@@ -15,7 +15,7 @@ type AppProvider struct {
 }
 
 // App provides a mock function with given fields: ctx, appID
-func (_m *AppProvider) App(ctx context.Context, appID int32) (models.App, error) {
+func (_m *AppProvider) App(ctx context.Context, appID string) (models.App, error) {
 	ret := _m.Called(ctx, appID)
 
 	if len(ret) == 0 {
@@ -24,16 +24,16 @@ func (_m *AppProvider) App(ctx context.Context, appID int32) (models.App, error)
 
 	var r0 models.App
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, int32) (models.App, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) (models.App, error)); ok {
 		return rf(ctx, appID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, int32) models.App); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) models.App); ok {
 		r0 = rf(ctx, appID)
 	} else {
 		r0 = ret.Get(0).(models.App)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, int32) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
 		r1 = rf(ctx, appID)
 	} else {
 		r1 = ret.Error(1)

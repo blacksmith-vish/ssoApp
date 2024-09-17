@@ -4,17 +4,11 @@ import (
 	"context"
 	"database/sql"
 	errs "sso/internal/domain/errors"
-	def "sso/internal/services/auth"
 	"sso/internal/store/models"
 
+	"github.com/google/uuid"
 	"github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
-)
-
-var (
-	_ def.UserSaver    = (*Store)(nil)
-	_ def.UserProvider = (*Store)(nil)
-	_ def.AppProvider  = (*Store)(nil)
 )
 
 type Store struct {
@@ -33,35 +27,32 @@ func New(StorePath string) (*Store, error) {
 	return &Store{db: db}, nil
 }
 
-func (s *Store) Stop() error {	
+func (s *Store) Stop() error {
 	return s.db.Close()
 }
 
 // SaveUser saves user to db.
-func (s *Store) SaveUser(ctx context.Context, email string, passHash []byte) (int64, error) {
+func (s *Store) SaveUser(ctx context.Context, email string, passHash []byte) (string, error) {
 	const op = "Store.sqlite.SaveUser"
 
-	stmt, err := s.db.Prepare("INSERT INTO users(email, pass_hash) VALUES(?, ?)")
+	stmt, err := s.db.Prepare("INSERT INTO users(id, email, pass_hash) VALUES(?, ?, ?)")
 	if err != nil {
-		return 0, errors.Wrap(err, op)
+		return "", errors.Wrap(err, op)
 	}
 
-	res, err := stmt.ExecContext(ctx, email, passHash)
+	ID := uuid.New().String()
+
+	_, err = stmt.ExecContext(ctx, ID, email, passHash)
 	if err != nil {
 		var sqliteErr sqlite3.Error
 		if errors.As(err, &sqliteErr) && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
-			return 0, errors.Wrap(errs.ErrUserExists, op)
+			return "", errors.Wrap(errs.ErrUserExists, op)
 		}
 
-		return 0, errors.Wrap(err, op)
+		return "", errors.Wrap(err, op)
 	}
 
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, errors.Wrap(err, op)
-	}
-
-	return id, nil
+	return ID, nil
 }
 
 // User returns user by email.
@@ -105,7 +96,7 @@ func (s *Store) User(ctx context.Context, email string) (models.User, error) {
 //}
 
 // App returns app by id.
-func (s *Store) App(ctx context.Context, id int32) (models.App, error) {
+func (s *Store) App(ctx context.Context, id string) (models.App, error) {
 	const op = "Store.sqlite.App"
 
 	stmt, err := s.db.Prepare("SELECT id, name, secret FROM apps WHERE id = ?")
@@ -128,7 +119,7 @@ func (s *Store) App(ctx context.Context, id int32) (models.App, error) {
 	return app, nil
 }
 
-func (s *Store) IsAdmin(ctx context.Context, userID int64) (bool, error) {
+func (s *Store) IsAdmin(ctx context.Context, userID string) (bool, error) {
 	const op = "Store.sqlite.IsAdmin"
 
 	stmt, err := s.db.Prepare("SELECT is_admin FROM users WHERE id = ?")

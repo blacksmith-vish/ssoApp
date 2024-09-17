@@ -21,7 +21,7 @@ func New(
 		panic(err)
 	}
 
-	authStoreProvider := auth.NewStoreProvider(
+	authStoreProvider := auth.NewAuthenticationStoreProvider(
 		storage,
 		storage,
 		storage,

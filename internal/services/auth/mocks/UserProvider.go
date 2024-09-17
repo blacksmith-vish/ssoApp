@@ -15,7 +15,7 @@ type UserProvider struct {
 }
 
 // IsAdmin provides a mock function with given fields: ctx, userID
-func (_m *UserProvider) IsAdmin(ctx context.Context, userID int64) (bool, error) {
+func (_m *UserProvider) IsAdmin(ctx context.Context, userID string) (bool, error) {
 	ret := _m.Called(ctx, userID)
 
 	if len(ret) == 0 {
@@ -24,16 +24,16 @@ func (_m *UserProvider) IsAdmin(ctx context.Context, userID int64) (bool, error)
 
 	var r0 bool
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, int64) (bool, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
 		return rf(ctx, userID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, int64) bool); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
 		r0 = rf(ctx, userID)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
 		r1 = rf(ctx, userID)
 	} else {
 		r1 = ret.Error(1)

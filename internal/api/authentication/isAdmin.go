@@ -7,26 +7,20 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 
-	apiValidator "sso/internal/lib/validators"
-
-	ssov1 "github.com/blacksmith-vish/sso/protos/gen/go/sso"
+	"github.com/blacksmith-vish/sso/gen/go/sso"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (srv *serverAPI) IsAdmin(
+func (srv *authenticationServerAPI) IsAdmin(
 	ctx context.Context,
-	request *ssov1.IsAdminRequest,
-) (*ssov1.IsAdminResponse, error) {
+	request *sso.IsAdminRequest,
+) (*sso.IsAdminResponse, error) {
 
 	validate := validator.New()
 
 	err := validate.Var(request.GetUserId(), "gte=0")
 	if err != nil {
-		return nil, err
-	}
-
-	if err := apiValidator.Validate(request); err != nil {
 		return nil, err
 	}
 
@@ -42,12 +36,8 @@ func (srv *serverAPI) IsAdmin(
 		return nil, status.Error(codes.Internal, "login failed")
 	}
 
-	response := &ssov1.IsAdminResponse{
+	response := &sso.IsAdminResponse{
 		IsAdmin: isAdmin,
-	}
-
-	if err := apiValidator.Validate(response); err != nil {
-		return nil, err
 	}
 
 	return response, nil

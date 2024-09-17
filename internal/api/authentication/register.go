@@ -6,37 +6,34 @@ import (
 	errs "sso/internal/domain/errors"
 	apiValidator "sso/internal/lib/validators"
 
-	ssov1 "github.com/blacksmith-vish/sso/protos/gen/go/sso"
+	"github.com/blacksmith-vish/sso/gen/go/sso"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (srv *serverAPI) Login(
+func (srv *authenticationServerAPI) Register(
 	ctx context.Context,
-	request *ssov1.LoginRequest,
-) (*ssov1.LoginResponse, error) {
+	request *sso.RegisterRequest,
+) (*sso.RegisterResponse, error) {
 
 	if err := apiValidator.Validate(request); err != nil {
 		return nil, err
 	}
 
-	token, err := srv.auth.Login(
+	userID, err := srv.auth.RegisterNewUser(
 		ctx,
 		request.GetEmail(),
 		request.GetPassword(),
-		request.GetAppId(),
 	)
 	if err != nil {
-
-		if errors.Is(err, errs.ErrInvalidCredentials) {
-			return nil, status.Error(codes.InvalidArgument, "login failed")
+		if errors.Is(err, errs.ErrUserExists) {
+			return nil, status.Error(codes.AlreadyExists, "login failed")
 		}
-
 		return nil, status.Error(codes.Internal, "login failed")
 	}
 
-	response := &ssov1.LoginResponse{
-		Token: token,
+	response := &sso.RegisterResponse{
+		UserId: userID,
 	}
 
 	if err := apiValidator.Validate(response); err != nil {
