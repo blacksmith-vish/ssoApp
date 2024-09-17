@@ -2,10 +2,12 @@ package config
 
 import (
 	"flag"
+	"log"
 	"os"
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 )
 
 const (
@@ -62,7 +64,12 @@ func fetchConfigPath() string {
 
 	flag.Parse()
 
-	if len(res) == 0 {
+	err := godotenv.Load()
+	if err != nil {
+		log.Print("Error loading .env file")
+	}
+
+	if res == "" {
 		res = os.Getenv("CONFIG_PATH")
 	}
 

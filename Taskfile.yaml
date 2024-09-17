@@ -8,28 +8,29 @@ vars:
 tasks:
   
   init:
-    desc: "Init developers instruments"
-    # cmd: go install github.com/cortesi/modd/cmd/modd@latest
-    # cmd: go install github.com/jdudmesh/gomon@latest
+    desc: "Init developers instruments [deprecated]"
+    deps: []
 
   run:
     desc: "Run main application"
+    deps: [migrate]
     cmd: go run ./cmd/sso {{.FLAG_CONFIG}}
 
   lint:
     desc: "lint all files"
     cmd: fieldalignment -fix ./...
-
+    ignore_error: true
+  
   ctx:
-    desc: "Run ctx application"
+    desc: "Run ctx application [deprecated]" 
     cmd: go run ./cmd/context
 
   charm:
-    desc: "Run charm application"
+    desc: "Run charm application [deprecated]"
     cmd: go run ./cmd/charmlog
 
   val:
-    desc: "Run val application"
+    desc: "Run val application [deprecated]"
     cmd: go run ./cmd/validator
 
   migrate:
@@ -39,6 +40,7 @@ tasks:
 
   test:
     desc: "Tests app"
+    deps: [migrate-test]
     cmd: go test -v -cover ./...
 
   migrate-test:
@@ -47,6 +49,7 @@ tasks:
 
   build:
     desc: "Builds application"
+    deps: [lint]
     cmds:
       - 'go build -o bin/ ./cmd/sso/main.go'
     sources:
@@ -62,3 +65,4 @@ tasks:
     sources: 
       - ./*.go,
       - ./**/*.go
+
