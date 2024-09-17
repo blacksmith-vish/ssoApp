@@ -1,9 +1,10 @@
-package auth
+package authentication
 
 import (
 	"context"
 	"log/slog"
 	errs "sso/internal/domain/errors"
+	"sso/internal/services/authentication/models"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
@@ -23,6 +24,15 @@ func (srv *server) IsAdmin(
 		slog.String("userID", request.GetUserId()),
 	)
 
+	serviceRequest := models.IsAdminRequest{
+		UserID: request.GetUserId(),
+	}
+
+	if err := validator.New().Struct(serviceRequest); err != nil {
+		log.Error("validation failed", "err", err.Error())
+		return nil, status.Error(codes.InvalidArgument, "login failed")
+	}
+
 	validate := validator.New()
 
 	err := validate.Var(request.GetUserId(), "required,uuid4")
@@ -31,17 +41,9 @@ func (srv *server) IsAdmin(
 		return nil, status.Error(codes.InvalidArgument, "login failed")
 	}
 
-	log.Debug("validation failed", "err",
-		[]string{
-			"shit1",
-			"shit2",
-			"shit3",
-		},
-	)
-
-	isAdmin, err := srv.auth.IsAdmin(
+	serviceResponse, err := srv.auth.IsAdmin(
 		ctx,
-		request.GetUserId(),
+		serviceRequest,
 	)
 
 	if err != nil {
@@ -52,7 +54,7 @@ func (srv *server) IsAdmin(
 	}
 
 	response := &sso.IsAdminResponse{
-		IsAdmin: isAdmin,
+		IsAdmin: serviceResponse.IsAdmin,
 	}
 
 	return response, nil

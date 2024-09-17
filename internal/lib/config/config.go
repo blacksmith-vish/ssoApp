@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
 )
@@ -34,7 +35,7 @@ type GRPCConfig struct {
 func MustLoad() *Config {
 
 	path := fetchConfigPath()
-	if len(path) == 0 {
+	if path == "" {
 		panic("config path is empty")
 	}
 
@@ -51,6 +52,10 @@ func MustLoadByPath(path string) *Config {
 
 	if err := cleanenv.ReadConfig(path, conf); err != nil {
 		panic("failed to parse config file: " + err.Error())
+	}
+
+	if err := validator.New().Struct(conf); err != nil {
+		panic("failed to validate config: " + err.Error())
 	}
 
 	return conf

@@ -9,11 +9,10 @@ tasks:
   
   init:
     desc: "Init developers instruments [deprecated]"
-    deps: []
+    deps: [migrate]
 
   run:
     desc: "Run main application"
-    deps: [migrate]
     cmd: go run ./cmd/sso {{.FLAG_CONFIG}}
 
   lint:

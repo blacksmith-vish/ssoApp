@@ -1,8 +1,9 @@
-package auth
+package authentication
 
 import (
 	"context"
 	"sso/internal/domain"
+	"sso/internal/services/authentication/models"
 
 	"github.com/blacksmith-vish/sso/gen/go/sso"
 )
@@ -10,21 +11,18 @@ import (
 type Authentication interface {
 	Login(
 		ctx context.Context,
-		email string,
-		password string,
-		appID string,
-	) (token string, err error)
+		request models.LoginRequest,
+	) (response models.LoginResponse, err error)
 
 	RegisterNewUser(
 		ctx context.Context,
-		email string,
-		password string,
-	) (userID string, err error)
+		request models.RegisterRequest,
+	) (response models.RegisterResponse, err error)
 
 	IsAdmin(
 		ctx context.Context,
-		userID string,
-	) (isAdmin bool, err error)
+		request models.IsAdminRequest,
+	) (response models.IsAdminResponse, err error)
 }
 
 type authenticationAPI struct {

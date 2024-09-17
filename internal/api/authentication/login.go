@@ -1,12 +1,15 @@
-package auth
+package authentication
 
 import (
 	"context"
-	"errors"
+	"log/slog"
 	errs "sso/internal/domain/errors"
-	apiValidator "sso/internal/lib/validators"
+	"sso/internal/services/authentication/models"
+
+	"github.com/pkg/errors"
 
 	"github.com/blacksmith-vish/sso/gen/go/sso"
+	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -16,15 +19,24 @@ func (srv *server) Login(
 	request *sso.LoginRequest,
 ) (*sso.LoginResponse, error) {
 
-	if err := apiValidator.Validate(request); err != nil {
-		return nil, err
+	log := srv.ctx.Log().With(
+		slog.String("op", sso.Authentication_Login_FullMethodName),
+	)
+
+	serviceRequest := models.LoginRequest{
+		Email:    request.GetEmail(),
+		Password: request.GetPassword(),
+		AppID:    request.GetAppId(),
 	}
 
-	token, err := srv.auth.Login(
+	if err := validator.New().Struct(serviceRequest); err != nil {
+		log.Error("validation failed", "err", err.Error())
+		return nil, status.Error(codes.InvalidArgument, "login failed")
+	}
+
+	serviceResponse, err := srv.auth.Login(
 		ctx,
-		request.GetEmail(),
-		request.GetPassword(),
-		request.GetAppId(),
+		serviceRequest,
 	)
 	if err != nil {
 
@@ -36,11 +48,7 @@ func (srv *server) Login(
 	}
 
 	response := &sso.LoginResponse{
-		Token: token,
-	}
-
-	if err := apiValidator.Validate(response); err != nil {
-		return nil, err
+		Token: serviceResponse.Token,
 	}
 
 	return response, nil

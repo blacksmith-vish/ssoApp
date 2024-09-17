@@ -3,7 +3,7 @@ package app
 import (
 	grpcApp "sso/internal/app/grpc"
 	"sso/internal/domain"
-	"sso/internal/services/auth"
+	"sso/internal/services/authentication"
 	"sso/internal/store/sqlite"
 )
 
@@ -21,14 +21,14 @@ func New(
 		panic(err)
 	}
 
-	authStoreProvider := auth.NewAuthenticationStoreProvider(
+	authStoreProvider := authentication.NewAuthenticationStoreProvider(
 		storage,
 		storage,
 		storage,
 	)
 
 	// Инициализация auth сервиса
-	authService := auth.New(ctx, authStoreProvider)
+	authService := authentication.New(ctx, authStoreProvider)
 
 	grpcapp := grpcApp.New(ctx, authService)
 

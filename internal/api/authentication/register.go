@@ -1,10 +1,13 @@
-package auth
+package authentication
 
 import (
 	"context"
-	"errors"
+	"log/slog"
 	errs "sso/internal/domain/errors"
-	apiValidator "sso/internal/lib/validators"
+	"sso/internal/services/authentication/models"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/pkg/errors"
 
 	"github.com/blacksmith-vish/sso/gen/go/sso"
 	"google.golang.org/grpc/codes"
@@ -16,14 +19,23 @@ func (srv *server) Register(
 	request *sso.RegisterRequest,
 ) (*sso.RegisterResponse, error) {
 
-	if err := apiValidator.Validate(request); err != nil {
-		return nil, err
+	log := srv.ctx.Log().With(
+		slog.String("op", sso.Authentication_Register_FullMethodName),
+	)
+
+	serviceRequest := models.RegisterRequest{
+		Email:    request.GetEmail(),
+		Password: request.GetPassword(),
 	}
 
-	userID, err := srv.auth.RegisterNewUser(
+	if err := validator.New().Struct(serviceRequest); err != nil {
+		log.Error("validation failed", "err", err.Error())
+		return nil, status.Error(codes.InvalidArgument, "login failed")
+	}
+
+	serviceResponse, err := srv.auth.RegisterNewUser(
 		ctx,
-		request.GetEmail(),
-		request.GetPassword(),
+		serviceRequest,
 	)
 	if err != nil {
 		if errors.Is(err, errs.ErrUserExists) {
@@ -33,11 +45,7 @@ func (srv *server) Register(
 	}
 
 	response := &sso.RegisterResponse{
-		UserId: userID,
-	}
-
-	if err := apiValidator.Validate(response); err != nil {
-		return nil, err
+		UserId: serviceResponse.UserID,
 	}
 
 	return response, nil

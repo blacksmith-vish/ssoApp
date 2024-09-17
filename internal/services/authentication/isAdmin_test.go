@@ -1,4 +1,4 @@
-package auth
+package authentication
 
 import (
 	"context"
@@ -6,8 +6,9 @@ import (
 	"log/slog"
 	"sso/internal/domain"
 	"sso/internal/lib/config"
-	"sso/internal/services/auth/mocks"
-	"sso/internal/store/models"
+	"sso/internal/services/authentication/mocks"
+	serviceModels "sso/internal/services/authentication/models"
+	storeModels "sso/internal/store/models"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,42 +19,42 @@ func TestMaxWidth(t *testing.T) {
 
 	TestingTable := []struct {
 		name string
-		arg  string // аргументы
+		arg  serviceModels.IsAdminRequest // аргументы
 		want struct {
-			result bool
+			result serviceModels.IsAdminResponse
 			err    bool
 		} // ожидаемое значение
 	}{
 		{
 			name: "test-1",
-			arg:  "0",
+			arg:  serviceModels.IsAdminRequest{UserID: "0"},
 			want: struct {
-				result bool
+				result serviceModels.IsAdminResponse
 				err    bool
 			}{
-				result: false,
+				result: serviceModels.IsAdminResponse{IsAdmin: false},
 				err:    false,
 			},
 		},
 		{
 			name: "test-2",
-			arg:  "2",
+			arg:  serviceModels.IsAdminRequest{UserID: "2"},
 			want: struct {
-				result bool
+				result serviceModels.IsAdminResponse
 				err    bool
 			}{
-				result: true,
+				result: serviceModels.IsAdminResponse{IsAdmin: true},
 				err:    false,
 			},
 		},
 		{
 			name: "test-3",
-			arg:  "-1",
+			arg:  serviceModels.IsAdminRequest{UserID: "-1"},
 			want: struct {
-				result bool
+				result serviceModels.IsAdminResponse
 				err    bool
 			}{
-				result: false,
+				result: serviceModels.IsAdminResponse{IsAdmin: false},
 				err:    true,
 			},
 		},
@@ -69,7 +70,7 @@ func TestMaxWidth(t *testing.T) {
 		On("IsAdmin", mock.Anything, "2").
 		Return(true, nil).
 		On("IsAdmin", mock.Anything, "-1").
-		Return(false, models.ErrUserNotFound)
+		Return(false, storeModels.ErrUserNotFound)
 
 	service := New(
 		domain.NewContext(
