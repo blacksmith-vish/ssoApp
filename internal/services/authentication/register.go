@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"log/slog"
-	errs "sso/internal/domain/errors"
 	"sso/internal/services/authentication/models"
+	"sso/internal/store/sqlite"
 
 	"github.com/pkg/errors"
 
@@ -19,7 +19,7 @@ func (a *Authentication) RegisterNewUser(
 
 	const op = "auth.RegisterNewUser"
 
-	log := a.ctx.Log().With(
+	log := a.log.With(
 		slog.String("op", op),
 		slog.String("email", request.Email), // TODO email лучше не логировать
 	)
@@ -35,9 +35,9 @@ func (a *Authentication) RegisterNewUser(
 	ID, err := a.userSaver.SaveUser(ctx, request.Email, passHash)
 	if err != nil {
 
-		if errors.Is(err, errs.ErrUserExists) {
+		if errors.Is(err, sqlite.ErrUserExists) {
 			log.Warn("user exists", slog.String("", err.Error()))
-			return models.RegisterResponse{}, errors.Wrap(errs.ErrUserExists, op)
+			return models.RegisterResponse{}, errors.Wrap(sqlite.ErrUserExists, op)
 		}
 
 		log.Error("failed to save user", slog.String("", err.Error()))

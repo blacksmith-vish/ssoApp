@@ -3,7 +3,7 @@ package authentication
 import (
 	"context"
 	"log/slog"
-	errs "sso/internal/domain/errors"
+	"sso/internal/services/authentication"
 	"sso/internal/services/authentication/models"
 
 	"github.com/pkg/errors"
@@ -19,7 +19,7 @@ func (srv *server) Login(
 	request *sso.LoginRequest,
 ) (*sso.LoginResponse, error) {
 
-	log := srv.ctx.Log().With(
+	log := srv.log.With(
 		slog.String("op", sso.Authentication_Login_FullMethodName),
 	)
 
@@ -40,7 +40,7 @@ func (srv *server) Login(
 	)
 	if err != nil {
 
-		if errors.Is(err, errs.ErrInvalidCredentials) {
+		if errors.Is(err, authentication.ErrInvalidCredentials) {
 			return nil, status.Error(codes.InvalidArgument, "login failed")
 		}
 

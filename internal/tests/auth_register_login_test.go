@@ -65,7 +65,7 @@ func TestRegisterLogin_Login_HappyPass(t *testing.T) {
 
 	const deltaSeconds = 1
 
-	assert.InDelta(t, loginTime.Add(st.Conf.TokenTTL).Unix(), claims["exp"].(float64), deltaSeconds)
+	assert.InDelta(t, loginTime.Add(st.Conf.Services.Authentication.TokenTTL).Unix(), claims["exp"].(float64), deltaSeconds)
 
 }
 

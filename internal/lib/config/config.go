@@ -2,13 +2,11 @@ package config
 
 import (
 	"flag"
-	"log"
 	"os"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/ilyakaznacheev/cleanenv"
-	"github.com/joho/godotenv"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -18,18 +16,10 @@ const (
 )
 
 type Config struct {
-	Env string `yaml:"env" env-default:"prod" validate:"oneof=dev prod"`
-
-	StorePath string `yaml:"store_path" env-required:"true"`
-
-	TokenTTL time.Duration `yaml:"token_ttl" env-required:"true"`
-
-	GRPC GRPCConfig `yaml:"grpc"`
-}
-
-type GRPCConfig struct {
-	Port    int           `yaml:"port" validate:"gte=1000,lte=99999"`
-	Timeout time.Duration `yaml:"timeout"`
+	Env       string   `yaml:"env" validate:"oneof=dev prod"`
+	StorePath string   `yaml:"store_path" validate:"required"`
+	Services  Services `yaml:"services"`
+	Servers   Servers  `yaml:"servers"`
 }
 
 func MustLoad() *Config {
@@ -54,9 +44,10 @@ func MustLoadByPath(path string) *Config {
 		panic("failed to parse config file: " + err.Error())
 	}
 
-	if err := validator.New().Struct(conf); err != nil {
-		panic("failed to validate config: " + err.Error())
-	}
+	mustValidate(
+		conf,
+		&conf.Servers,
+	)
 
 	return conf
 }
@@ -69,14 +60,16 @@ func fetchConfigPath() string {
 
 	flag.Parse()
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Print("Error loading .env file")
-	}
-
 	if res == "" {
 		res = os.Getenv("CONFIG_PATH")
 	}
 
 	return res
+}
+
+func (conf *Config) validate() error {
+	if err := validator.New().Struct(conf); err != nil {
+		return errors.Wrap(err, "config")
+	}
+	return nil
 }

@@ -4,12 +4,11 @@ import (
 	"context"
 	"io"
 	"log/slog"
-	"sso/internal/domain"
-	"sso/internal/lib/config"
 	"sso/internal/services/authentication/mocks"
 	serviceModels "sso/internal/services/authentication/models"
 	storeModels "sso/internal/store/models"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -73,13 +72,11 @@ func TestMaxWidth(t *testing.T) {
 		Return(false, storeModels.ErrUserNotFound)
 
 	service := NewService(
-		domain.NewContext(
-			slog.New(slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelInfo})),
-			config.MustLoadByPath("../../../config/local.yaml"),
-		),
+		slog.New(slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelInfo})),
 		userSaver,
 		userProvider,
 		appProvider,
+		time.Minute,
 	)
 
 	for _, tt := range TestingTable {

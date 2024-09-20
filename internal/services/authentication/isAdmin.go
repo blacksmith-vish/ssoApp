@@ -14,7 +14,7 @@ func (a *Authentication) IsAdmin(
 ) (models.IsAdminResponse, error) {
 	const op = "auth.IsAdmin"
 
-	log := a.ctx.Log().With(
+	log := a.log.With(
 		slog.String("op", op),
 		slog.String("userID", request.UserID),
 	)

@@ -3,12 +3,17 @@ package sqlite
 import (
 	"context"
 	"database/sql"
-	errs "sso/internal/domain/errors"
 	"sso/internal/store/models"
 
 	"github.com/google/uuid"
 	"github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
+)
+
+var (
+	ErrUserExists   = errors.New("user exists already")
+	ErrUserNotFound = errors.New("user not found")
+	ErrAppNotFound  = errors.New("app not found")
 )
 
 type Store struct {
@@ -46,7 +51,7 @@ func (s *Store) SaveUser(ctx context.Context, email string, passHash []byte) (st
 	if err != nil {
 		var sqliteErr sqlite3.Error
 		if errors.As(err, &sqliteErr) && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
-			return "", errors.Wrap(errs.ErrUserExists, op)
+			return "", errors.Wrap(ErrUserExists, op)
 		}
 
 		return "", errors.Wrap(err, op)
@@ -70,7 +75,7 @@ func (s *Store) User(ctx context.Context, email string) (models.User, error) {
 	err = row.Scan(&user.ID, &user.Email, &user.PasswordHash)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return models.User{}, errors.Wrap(errs.ErrUserNotFound, op)
+			return models.User{}, errors.Wrap(ErrUserNotFound, op)
 		}
 
 		return models.User{}, errors.Wrap(err, op)
@@ -110,7 +115,7 @@ func (s *Store) App(ctx context.Context, id string) (models.App, error) {
 	err = row.Scan(&app.ID, &app.Name, &app.Secret)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return models.App{}, errors.Wrap(errs.ErrAppNotFound, op)
+			return models.App{}, errors.Wrap(ErrAppNotFound, op)
 		}
 
 		return models.App{}, errors.Wrap(err, op)
@@ -134,7 +139,7 @@ func (s *Store) IsAdmin(ctx context.Context, userID string) (bool, error) {
 	err = row.Scan(&isAdmin)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return false, errors.Wrap(errs.ErrUserNotFound, op)
+			return false, errors.Wrap(ErrUserNotFound, op)
 		}
 
 		return false, errors.Wrap(err, op)

@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net"
 	authenticationGRPC "sso/internal/api/authentication"
-	"sso/internal/domain"
+	"sso/internal/lib/config"
 
 	"github.com/blacksmith-vish/sso/gen/go/sso"
 	"github.com/pkg/errors"
@@ -13,13 +13,14 @@ import (
 )
 
 type App struct {
-	ctx        *domain.Context
+	log        *slog.Logger
 	gRPCServer *grpc.Server
-	port       int
+	port       uint16
 }
 
-func New(
-	ctx *domain.Context,
+func NewGrpcApp(
+	log *slog.Logger,
+	conf config.GRPCConfig,
 	authService authenticationGRPC.Authentication,
 ) *App {
 
@@ -28,17 +29,15 @@ func New(
 	sso.RegisterAuthenticationServer(
 		gRPCServer,
 		authenticationGRPC.NewAuthenticationServer(
-			ctx,
+			log,
 			authService,
 		),
 	)
 
-	//	authenticationGRPC.Register(gRPCServer, authService)
-
 	return &App{
-		ctx:        ctx,
+		log:        log,
 		gRPCServer: gRPCServer,
-		port:       ctx.Config().GRPC.Port,
+		port:       conf.Port,
 	}
 }
 
@@ -52,9 +51,9 @@ func (a *App) Run() error {
 
 	const op = "grpcApp.Run"
 
-	log := a.ctx.Log().With(
+	log := a.log.With(
 		slog.String("op", op),
-		slog.Int("port", a.port),
+		slog.Any("port", a.port),
 	)
 
 	log.Info("starting gRPC server")
@@ -77,8 +76,8 @@ func (a *App) Stop() {
 
 	const op = "grpcApp.Stop"
 
-	a.ctx.Log().With(slog.String("op", op)).
-		Info("stopping gRPC server", slog.Int("port", a.port))
+	a.log.With(slog.String("op", op)).
+		Info("stopping gRPC server", slog.Any("port", a.port))
 
 	a.gRPCServer.GracefulStop()
 

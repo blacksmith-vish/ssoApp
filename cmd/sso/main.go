@@ -4,23 +4,24 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
-	"sso/internal/domain"
 	"syscall"
 
 	"sso/internal/app"
+	"sso/internal/lib/config"
+	"sso/internal/lib/logger"
 )
 
 func main() {
 
-	// Инициализация контекста приложения
-	ctx := domain.NewContextWithOpts()
+	// Инициализация конфига
+	conf := config.MustLoad()
 
-	log := ctx.Log()
+	log := logger.SetupLogger(conf.Env)
 
 	log.Info("start app")
 
 	// Инициализация приложения
-	application := app.New(ctx)
+	application := app.NewApp(log, conf)
 
 	// Инициализация gRPC-сервер
 	go application.GRPCServer.MustRun()

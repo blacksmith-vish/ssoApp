@@ -3,9 +3,9 @@ package authentication
 import (
 	"context"
 	"log/slog"
-	errs "sso/internal/domain/errors"
 	"sso/internal/lib/jwt"
 	"sso/internal/services/authentication/models"
+	"sso/internal/store/sqlite"
 
 	"github.com/pkg/errors"
 
@@ -20,7 +20,7 @@ func (a *Authentication) Login(
 
 	const op = "auth.Login"
 
-	log := a.ctx.Log().With(
+	log := a.log.With(
 		slog.String("op", op),
 		slog.String("email", request.Email), // TODO email лучше не логировать
 	)
@@ -30,10 +30,10 @@ func (a *Authentication) Login(
 	user, err := a.userProvider.User(ctx, request.Email)
 	if err != nil {
 
-		if errors.Is(err, errs.ErrUserNotFound) {
+		if errors.Is(err, sqlite.ErrUserNotFound) {
 			log.Warn("user not found", slog.String("", err.Error()))
 
-			return models.LoginResponse{}, errors.Wrap(errs.ErrInvalidCredentials, op)
+			return models.LoginResponse{}, errors.Wrap(ErrInvalidCredentials, op)
 		}
 
 		log.Error("failed to get user", slog.String("", err.Error()))
@@ -42,15 +42,15 @@ func (a *Authentication) Login(
 
 	if err := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(request.Password)); err != nil {
 		log.Error("invalid credentials", slog.String("", err.Error()))
-		return models.LoginResponse{}, errors.Wrap(errs.ErrInvalidCredentials, op)
+		return models.LoginResponse{}, errors.Wrap(ErrInvalidCredentials, op)
 	}
 
 	app, err := a.appProvider.App(ctx, request.AppID)
 	if err != nil {
 
-		if errors.Is(err, errs.ErrAppNotFound) {
+		if errors.Is(err, sqlite.ErrAppNotFound) {
 			log.Warn("user not found", slog.String("", err.Error()))
-			return models.LoginResponse{}, errors.Wrap(errs.ErrInvalidAppID, op)
+			return models.LoginResponse{}, errors.Wrap(ErrInvalidAppID, op)
 		}
 
 		log.Error("failed getting app", slog.String("", err.Error()))

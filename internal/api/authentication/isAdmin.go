@@ -3,8 +3,8 @@ package authentication
 import (
 	"context"
 	"log/slog"
-	errs "sso/internal/domain/errors"
 	"sso/internal/services/authentication/models"
+	"sso/internal/store/sqlite"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
@@ -19,7 +19,7 @@ func (srv *server) IsAdmin(
 	request *sso.IsAdminRequest,
 ) (*sso.IsAdminResponse, error) {
 
-	log := srv.ctx.Log().With(
+	log := srv.log.With(
 		slog.String("op", sso.Authentication_IsAdmin_FullMethodName),
 		slog.String("userID", request.GetUserId()),
 	)
@@ -39,7 +39,7 @@ func (srv *server) IsAdmin(
 	)
 
 	if err != nil {
-		if errors.Is(err, errs.ErrUserNotFound) {
+		if errors.Is(err, sqlite.ErrUserNotFound) {
 			return nil, status.Error(codes.AlreadyExists, "login failed")
 		}
 		return nil, status.Error(codes.Internal, "login failed")

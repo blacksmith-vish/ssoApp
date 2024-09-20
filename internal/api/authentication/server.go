@@ -2,7 +2,7 @@ package authentication
 
 import (
 	"context"
-	"sso/internal/domain"
+	"log/slog"
 	"sso/internal/services/authentication/models"
 
 	"github.com/blacksmith-vish/sso/gen/go/sso"
@@ -27,19 +27,19 @@ type Authentication interface {
 
 type authenticationAPI struct {
 	sso.UnimplementedAuthenticationServer
-	ctx  *domain.Context
+	log  *slog.Logger
 	auth Authentication
 }
 
 type server = authenticationAPI
 
 func NewAuthenticationServer(
-	ctx *domain.Context,
+	log *slog.Logger,
 	auth Authentication,
 ) *authenticationAPI {
 
 	return &authenticationAPI{
-		ctx:  ctx,
+		log:  log,
 		auth: auth,
 	}
 

@@ -2,9 +2,15 @@ package authentication
 
 import (
 	"context"
-	"sso/internal/domain"
+	"errors"
+	"log/slog"
 	"sso/internal/store/models"
 	"time"
+)
+
+var (
+	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrInvalidAppID       = errors.New("invalid app_id")
 )
 
 //go:generate go run github.com/vektra/mockery/v2@v2.45.0 --name=UserSaver
@@ -28,7 +34,7 @@ type AppProvider interface {
 }
 
 type Authentication struct {
-	ctx          *domain.Context
+	log          *slog.Logger
 	userSaver    UserSaver
 	userProvider UserProvider
 	appProvider  AppProvider
@@ -37,16 +43,17 @@ type Authentication struct {
 
 // New returns a new instance of Auth
 func NewService(
-	ctx *domain.Context,
+	log *slog.Logger,
 	userSaver UserSaver,
 	userProvider UserProvider,
 	appProvider AppProvider,
+	tokenTTL time.Duration,
 ) *Authentication {
 	return &Authentication{
-		ctx:          ctx,
+		log:          log,
 		userSaver:    userSaver,
 		userProvider: userProvider,
 		appProvider:  appProvider,
-		tokenTTL:     ctx.Config().TokenTTL,
+		tokenTTL:     tokenTTL,
 	}
 }

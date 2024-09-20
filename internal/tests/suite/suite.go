@@ -29,7 +29,7 @@ func New(t *testing.T) (context.Context, *Suite) {
 
 	conf := config.MustLoadByPath("../../config/local.yaml")
 
-	ctx, cancelCtx := context.WithTimeout(context.Background(), conf.GRPC.Timeout)
+	ctx, cancelCtx := context.WithTimeout(context.Background(), conf.Services.Authentication.TokenTTL)
 
 	t.Cleanup(func() {
 		t.Helper()
@@ -53,5 +53,5 @@ func New(t *testing.T) (context.Context, *Suite) {
 }
 
 func grpcAddress(conf *config.Config) string {
-	return net.JoinHostPort(grpcHost, strconv.Itoa(conf.GRPC.Port))
+	return net.JoinHostPort(grpcHost, strconv.Itoa(int(conf.Servers.GRPC.Port)))
 }
