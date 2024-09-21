@@ -60,15 +60,13 @@ func (a *App) Run() error {
 		slog.Any("port", a.port),
 	)
 
-	log.Info("starting REST server")
+	log.Info("REST server is running", slog.String("addr", a.server.Addr))
 
 	if err := a.server.ListenAndServe(); err != nil {
 		if !errors.Is(err, http.ErrServerClosed) {
 			return errors.Wrap(err, op)
 		}
 	}
-
-	log.Info("REST server is running", slog.String("addr", a.server.Addr))
 
 	return nil
 }

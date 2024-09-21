@@ -2,18 +2,15 @@ package authentication
 
 import (
 	"context"
-	"embed"
 	"fmt"
 	"html/template"
 	"log/slog"
 	"net/http"
+	embed "sso"
 	"sso/internal/services/authentication/models"
 
 	"github.com/go-chi/chi/v5"
 )
-
-//go:embed static
-var staticFiles embed.FS
 
 type Authentication interface {
 	RegisterNewUser(
@@ -43,7 +40,7 @@ func NewAuthenticationServer(
 
 func (srv server) InitRouters(router *chi.Mux) {
 
-	fs := http.FileServer(http.FS(staticFiles))
+	fs := http.FileServer(http.FS(embed.StaticFiles))
 	router.Handle("/static/*", fs)
 
 	router.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +53,7 @@ func (srv server) InitRouters(router *chi.Mux) {
 
 		(w).Header().Set("Content-Type", "text;charset-utf-8")
 
-		templ, err := template.ParseFS(staticFiles, "static/*.html")
+		templ, err := template.ParseFS(embed.StaticFiles, "static/authentication/*.html")
 
 		if err != nil {
 			fmt.Println(err)
