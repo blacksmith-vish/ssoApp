@@ -1,8 +1,9 @@
 package models
 
 type RegisterRequest struct {
-	Email    string `validate:"required,email"`
-	Password string `validate:"required"`
+	Nickname string `json:"nickname" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"pswd" validate:"required"`
 }
 
 type RegisterResponse struct {

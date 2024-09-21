@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -26,15 +27,25 @@ func main() {
 	// Инициализация gRPC-сервер
 	go application.GRPCServer.MustRun()
 
+	go application.RESTServer.MustRun()
+
 	// Graceful shut down
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 	sig := <-stop
 
-	log.Info("application stopping", slog.String("signal", sig.String()))
+	log.Info("app stopping", slog.String("signal", sig.String()))
+
+	ctx, cancel := context.WithTimeout(context.Background(), conf.Servers.REST.Timeout)
+	defer func() {
+		// extra handling here
+		cancel()
+	}()
 
 	application.GRPCServer.Stop()
 
-	log.Info("application stopped")
+	application.RESTServer.Stop(ctx)
+
+	log.Info("app stopped")
 }

@@ -17,6 +17,7 @@ var (
 type UserSaver interface {
 	SaveUser(
 		ctx context.Context,
+		nickname string,
 		email string,
 		passwordHash []byte,
 	) (userID string, err error)

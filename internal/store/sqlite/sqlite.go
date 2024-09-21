@@ -32,22 +32,26 @@ func New(StorePath string) (*Store, error) {
 	return &Store{db: db}, nil
 }
 
+func (s *Store) DB() *sql.DB {
+	return s.db
+}
+
 func (s *Store) Stop() error {
 	return s.db.Close()
 }
 
 // SaveUser saves user to db.
-func (s *Store) SaveUser(ctx context.Context, email string, passHash []byte) (string, error) {
+func (s *Store) SaveUser(ctx context.Context, nickname, email string, passHash []byte) (string, error) {
 	const op = "Store.sqlite.SaveUser"
 
-	stmt, err := s.db.Prepare("INSERT INTO users(id, email, pass_hash) VALUES(?, ?, ?)")
+	stmt, err := s.db.Prepare("INSERT INTO users(id, nickname, email, pass_hash) VALUES(?, ?, ?, ?)")
 	if err != nil {
 		return "", errors.Wrap(err, op)
 	}
 
 	ID := uuid.New().String()
 
-	_, err = stmt.ExecContext(ctx, ID, email, passHash)
+	_, err = stmt.ExecContext(ctx, ID, nickname, email, passHash)
 	if err != nil {
 		var sqliteErr sqlite3.Error
 		if errors.As(err, &sqliteErr) && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {

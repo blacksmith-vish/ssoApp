@@ -32,7 +32,7 @@ func (a *Authentication) RegisterNewUser(
 		return models.RegisterResponse{}, errors.Wrap(err, op)
 	}
 
-	ID, err := a.userSaver.SaveUser(ctx, request.Email, passHash)
+	ID, err := a.userSaver.SaveUser(ctx, request.Nickname, request.Email, passHash)
 	if err != nil {
 
 		if errors.Is(err, sqlite.ErrUserExists) {

@@ -13,9 +13,9 @@ type UserSaver struct {
 	mock.Mock
 }
 
-// SaveUser provides a mock function with given fields: ctx, email, passwordHash
-func (_m *UserSaver) SaveUser(ctx context.Context, email string, passwordHash []byte) (string, error) {
-	ret := _m.Called(ctx, email, passwordHash)
+// SaveUser provides a mock function with given fields: ctx, nickname, email, passwordHash
+func (_m *UserSaver) SaveUser(ctx context.Context, nickname string, email string, passwordHash []byte) (string, error) {
+	ret := _m.Called(ctx, nickname, email, passwordHash)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SaveUser")
@@ -23,17 +23,17 @@ func (_m *UserSaver) SaveUser(ctx context.Context, email string, passwordHash []
 
 	var r0 string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, []byte) (string, error)); ok {
-		return rf(ctx, email, passwordHash)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, []byte) (string, error)); ok {
+		return rf(ctx, nickname, email, passwordHash)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, []byte) string); ok {
-		r0 = rf(ctx, email, passwordHash)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, []byte) string); ok {
+		r0 = rf(ctx, nickname, email, passwordHash)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, []byte) error); ok {
-		r1 = rf(ctx, email, passwordHash)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, []byte) error); ok {
+		r1 = rf(ctx, nickname, email, passwordHash)
 	} else {
 		r1 = ret.Error(1)
 	}
