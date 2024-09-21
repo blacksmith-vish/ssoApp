@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
-	authenticationGRPC "sso/internal/api/authentication"
+	authenticationGRPC "sso/internal/api/authentication/grpc"
 	"sso/internal/lib/config"
 
 	"github.com/blacksmith-vish/sso/gen/go/sso"

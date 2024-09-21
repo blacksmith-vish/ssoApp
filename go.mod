@@ -11,13 +11,14 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.17.1
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.26.0
 	google.golang.org/grpc v1.65.0
 )
+
+require github.com/joho/godotenv v1.5.1 // indirect
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
