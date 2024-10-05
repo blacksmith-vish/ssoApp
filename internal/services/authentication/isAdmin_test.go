@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"sso/internal/services/authentication/mocks"
 	serviceModels "sso/internal/services/authentication/models"
-	storeModels "sso/internal/store/models"
+	"sso/internal/store/sqlite"
 	"testing"
 	"time"
 
@@ -69,7 +69,7 @@ func TestMaxWidth(t *testing.T) {
 		On("IsAdmin", mock.Anything, "2").
 		Return(true, nil).
 		On("IsAdmin", mock.Anything, "-1").
-		Return(false, storeModels.ErrUserNotFound)
+		Return(false, sqlite.ErrUserNotFound)
 
 	service := NewService(
 		slog.New(slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelInfo})),
