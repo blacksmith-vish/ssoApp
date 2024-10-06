@@ -6,8 +6,8 @@ import (
 	grpcApp "sso/internal/app/grpc"
 	restApp "sso/internal/app/rest"
 	"sso/internal/lib/config"
+	"sso/internal/lib/migrate"
 	authService "sso/internal/services/authentication"
-	"sso/internal/store"
 	"sso/internal/store/sqlite"
 )
 
@@ -27,7 +27,7 @@ func NewApp(
 		panic(err)
 	}
 
-	if err := store.Migrate(storage); err != nil {
+	if err := migrate.Migrate(storage); err != nil {
 		panic(err)
 	}
 
