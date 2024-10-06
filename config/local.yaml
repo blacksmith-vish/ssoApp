@@ -8,6 +8,7 @@ services:
   authentication:
     token_ttl: 1h
 
+# ports are meant to be in between (8000,65535)
 servers:
 
   grpc:
@@ -16,4 +17,8 @@ servers:
 
   rest:
     port: 8080
+    timeout: 5s
+  
+  routes:
+    port: 3000
     timeout: 5s

@@ -3,11 +3,16 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"path"
 	"sso/internal/store/models"
 
 	"github.com/google/uuid"
 	"github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
+)
+
+const (
+	dialect string = "sqlite"
 )
 
 var (
@@ -34,6 +39,14 @@ func New(StorePath string) (*Store, error) {
 
 func (s *Store) DB() *sql.DB {
 	return s.db
+}
+
+func (s *Store) Dialect() string {
+	return dialect
+}
+
+func (s *Store) MigrationsPath() string {
+	return path.Join("migrations", dialect)
 }
 
 func (s *Store) Stop() error {
