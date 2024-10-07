@@ -10,12 +10,15 @@ import (
 
 func SetupLogger(env string) *slog.Logger {
 
+	devHandler := dev.NewHandler(
+		os.Stdout,
+		&slog.HandlerOptions{Level: slog.LevelDebug},
+	)
+
 	switch env {
 
 	case config.EnvDev:
-		return slog.New(
-			dev.NewHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
-		)
+		return slog.New(devHandler)
 
 	case config.EnvProd:
 		return slog.New(

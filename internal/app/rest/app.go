@@ -8,8 +8,9 @@ import (
 	"net/http"
 	"sso/internal/lib/config"
 
+	middleW "sso/internal/lib/middleware"
+
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/pkg/errors"
 )
 
@@ -27,22 +28,19 @@ func NewRestApp(
 	log *slog.Logger,
 	conf config.RESTConfig,
 	services ...Service,
-	// authService authenticationGRPC.Authentication,
 ) *App {
 
-	Log := log.With(
-		slog.String("server", "REST"),
-	)
-
 	router := chi.NewRouter()
-	router.Use(middleware.Logger)
+	router.Use(
+		middleW.RequestLogger(log),
+	)
 
 	for i := range services {
 		services[i].InitRouters(router)
 	}
 
 	return &App{
-		log: Log,
+		log: log,
 		server: &http.Server{
 			Addr:    fmt.Sprintf(":%d", conf.Port),
 			Handler: router,

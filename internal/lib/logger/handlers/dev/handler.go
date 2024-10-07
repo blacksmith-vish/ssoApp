@@ -86,12 +86,12 @@ func (handler *DevHandler) Handle(_ context.Context, rec slog.Record) error {
 func (handler *DevHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 
 	handler.attrs = append(handler.attrs, attrs...)
-	return handler
-	// return &DevHandler{
-	// 	Handler: handler.Handler,
-	// 	std:     handler.std,
-	// 	attrs:   attrs,
-	// }
+	// return handler
+	return &DevHandler{
+		Handler: handler.Handler.WithAttrs(handler.attrs),
+		std:     handler.std,
+		attrs:   attrs,
+	}
 }
 
 func (handler *DevHandler) WithGroup(name string) slog.Handler {
