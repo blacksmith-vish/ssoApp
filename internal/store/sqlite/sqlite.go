@@ -37,27 +37,27 @@ func New(StorePath string) (*Store, error) {
 	return &Store{db: db}, nil
 }
 
-func (s *Store) DB() *sql.DB {
-	return s.db
+func (store *Store) DB() *sql.DB {
+	return store.db
 }
 
-func (s *Store) Dialect() string {
+func (store *Store) Dialect() string {
 	return dialect
 }
 
-func (s *Store) MigrationsPath() string {
+func (store *Store) MigrationsPath() string {
 	return path.Join("migrations", dialect)
 }
 
-func (s *Store) Stop() error {
-	return s.db.Close()
+func (store *Store) Stop() error {
+	return store.db.Close()
 }
 
 // SaveUser saves user to db.
-func (s *Store) SaveUser(ctx context.Context, nickname, email string, passHash []byte) (string, error) {
+func (store *Store) SaveUser(ctx context.Context, nickname, email string, passHash []byte) (string, error) {
 	const op = "Store.sqlite.SaveUser"
 
-	stmt, err := s.db.Prepare("INSERT INTO users(id, nickname, email, pass_hash) VALUES(?, ?, ?, ?)")
+	stmt, err := store.db.Prepare("INSERT INTO users(id, nickname, email, pass_hash) VALUES(?, ?, ?, ?)")
 	if err != nil {
 		return "", errors.Wrap(err, op)
 	}
@@ -78,10 +78,10 @@ func (s *Store) SaveUser(ctx context.Context, nickname, email string, passHash [
 }
 
 // User returns user by email.
-func (s *Store) User(ctx context.Context, email string) (models.User, error) {
+func (store *Store) User(ctx context.Context, email string) (models.User, error) {
 	const op = "Store.sqlite.User"
 
-	stmt, err := s.db.Prepare("SELECT id, email, pass_hash FROM users WHERE email = ?")
+	stmt, err := store.db.Prepare("SELECT id, email, pass_hash FROM users WHERE email = ?")
 	if err != nil {
 		return models.User{}, errors.Wrap(err, op)
 	}
@@ -118,10 +118,10 @@ func (s *Store) User(ctx context.Context, email string) (models.User, error) {
 //}
 
 // App returns app by id.
-func (s *Store) App(ctx context.Context, id string) (models.App, error) {
+func (store *Store) App(ctx context.Context, id string) (models.App, error) {
 	const op = "Store.sqlite.App"
 
-	stmt, err := s.db.Prepare("SELECT id, name, secret FROM apps WHERE id = ?")
+	stmt, err := store.db.Prepare("SELECT id, name, secret FROM apps WHERE id = ?")
 	if err != nil {
 		return models.App{}, errors.Wrap(err, op)
 	}
@@ -141,10 +141,10 @@ func (s *Store) App(ctx context.Context, id string) (models.App, error) {
 	return app, nil
 }
 
-func (s *Store) IsAdmin(ctx context.Context, userID string) (bool, error) {
+func (store *Store) IsAdmin(ctx context.Context, userID string) (bool, error) {
 	const op = "Store.sqlite.IsAdmin"
 
-	stmt, err := s.db.Prepare("SELECT is_admin FROM users WHERE id = ?")
+	stmt, err := store.db.Prepare("SELECT is_admin FROM users WHERE id = ?")
 	if err != nil {
 		return false, errors.Wrap(err, op)
 	}
