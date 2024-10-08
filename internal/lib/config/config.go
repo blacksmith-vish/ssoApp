@@ -9,14 +9,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	EnvDev  = "dev"
-	EnvProd = "prod"
-	EnvTest = "test"
-)
-
 type Config struct {
-	Env       string   `yaml:"env" validate:"oneof=dev prod"`
+	Env       string   `yaml:"env" validate:"oneof=dev prod test"`
 	StorePath string   `yaml:"store_path" validate:"required"`
 	Services  Services `yaml:"services"`
 	Servers   Servers  `yaml:"servers"`

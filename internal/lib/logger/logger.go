@@ -4,7 +4,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
-	"sso/internal/lib/config"
+	"sso/internal/lib/env"
 	"sso/internal/lib/logger/handlers/dev"
 )
 
@@ -16,24 +16,24 @@ func SetupLoggerWithConf(conf Config) *slog.Logger {
 	return SetupLogger(conf.GetEnv())
 }
 
-func SetupLogger(env string) *slog.Logger {
+func SetupLogger(Env string) *slog.Logger {
 
 	devHandler := dev.NewHandler(
 		os.Stdout,
 		&slog.HandlerOptions{Level: slog.LevelDebug},
 	)
 
-	switch env {
+	switch Env {
 
-	case config.EnvDev:
+	case env.EnvDev:
 		return slog.New(devHandler)
 
-	case config.EnvProd:
+	case env.EnvProd:
 		return slog.New(
 			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
 		)
 
-	case config.EnvTest:
+	case env.EnvTest:
 		return slog.New(
 			slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelInfo}),
 		)
