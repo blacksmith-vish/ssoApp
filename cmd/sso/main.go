@@ -17,7 +17,7 @@ func main() {
 	// Инициализация конфига
 	conf := config.MustLoad()
 
-	log := logger.SetupLogger(conf.Env)
+	log := logger.SetupLoggerWithConf(conf)
 
 	log.Info("start app")
 

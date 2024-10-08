@@ -73,3 +73,7 @@ func (conf *Config) validate() error {
 	}
 	return nil
 }
+
+func (conf Config) GetEnv() string {
+	return conf.Env
+}
