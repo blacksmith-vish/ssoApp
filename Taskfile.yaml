@@ -7,9 +7,8 @@ vars:
 
 tasks:
   
-  init:
-    desc: "Init developers instruments [deprecated]"
-    deps: [migrate]
+  # init:
+  #   desc: "Init developers instruments [deprecated]"
 
   run:
     desc: "Run main application"
@@ -19,10 +18,6 @@ tasks:
     desc: "lint all files"
     cmd: fieldalignment -fix ./...
     ignore_error: true
-  
-  ctx:
-    desc: "Run ctx application [deprecated]" 
-    cmd: go run ./cmd/context
 
   charm:
     desc: "Run charm application [deprecated]"
@@ -32,19 +27,9 @@ tasks:
     desc: "Run val application [deprecated]"
     cmd: go run ./cmd/validator
 
-  migrate:
-    desc: "migrate DB"
-    cmds:
-      - go run ./cmd/migrator --storage-path=$STORE_PATH --migrations-path=./migrations
-
   test:
     desc: "Tests app"
-    deps: [migrate-test]
     cmd: go test -v -cover ./...
-
-  migrate-test:
-    desc: "migrate test DB"
-    cmd: go run ./cmd/migrator --storage-path=$STORE_PATH --migrations-path=./internal/tests/migrations --migrations-table=migrations_test
 
   build:
     desc: "Builds application"
