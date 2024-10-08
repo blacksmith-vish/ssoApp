@@ -13,6 +13,10 @@ var (
 	ErrInvalidAppID       = errors.New("invalid app_id")
 )
 
+type Config interface {
+	GetTokenTTL() time.Duration
+}
+
 //go:generate go run github.com/vektra/mockery/v2@v2.45.0 --name=UserSaver
 type UserSaver interface {
 	SaveUser(
@@ -45,16 +49,16 @@ type Authentication struct {
 // New returns a new instance of Auth
 func NewService(
 	log *slog.Logger,
+	conf Config,
 	userSaver UserSaver,
 	userProvider UserProvider,
 	appProvider AppProvider,
-	tokenTTL time.Duration,
 ) *Authentication {
 	return &Authentication{
 		log:          log,
 		userSaver:    userSaver,
 		userProvider: userProvider,
 		appProvider:  appProvider,
-		tokenTTL:     tokenTTL,
+		tokenTTL:     conf.GetTokenTTL(),
 	}
 }

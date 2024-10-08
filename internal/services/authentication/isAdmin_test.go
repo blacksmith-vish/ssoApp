@@ -14,6 +14,20 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+type ConfigTest struct {
+	tokenTTL time.Duration
+}
+
+func NewConfigTest() *ConfigTest {
+	return &ConfigTest{
+		tokenTTL: time.Minute,
+	}
+}
+
+func (conf ConfigTest) GetTokenTTL() time.Duration {
+	return conf.tokenTTL
+}
+
 func TestMaxWidth(t *testing.T) {
 
 	TestingTable := []struct {
@@ -73,10 +87,10 @@ func TestMaxWidth(t *testing.T) {
 
 	service := NewService(
 		slog.New(slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelInfo})),
+		NewConfigTest(),
 		userSaver,
 		userProvider,
 		appProvider,
-		time.Minute,
 	)
 
 	for _, tt := range TestingTable {

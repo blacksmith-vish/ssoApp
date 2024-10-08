@@ -34,10 +34,10 @@ func NewApp(
 	// Инициализация auth сервиса
 	authService := authService.NewService(
 		log,
+		conf.Services.Authentication,
 		storage,
 		storage,
 		storage,
-		conf.Services.Authentication.TokenTTL,
 	)
 
 	grpcapp := grpcApp.NewGrpcApp(log, conf.Servers.GRPC, authService)
