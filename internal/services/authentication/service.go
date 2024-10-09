@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"sso/internal/lib/config"
 	"sso/internal/store/models"
 	"time"
 )
@@ -12,10 +13,6 @@ var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrInvalidAppID       = errors.New("invalid app_id")
 )
-
-type Config interface {
-	GetTokenTTL() time.Duration
-}
 
 //go:generate go run github.com/vektra/mockery/v2@v2.45.0 --name=UserSaver
 type UserSaver interface {
@@ -49,7 +46,7 @@ type Authentication struct {
 // New returns a new instance of Auth
 func NewService(
 	log *slog.Logger,
-	conf Config,
+	conf config.AuthenticationService,
 	userSaver UserSaver,
 	userProvider UserProvider,
 	appProvider AppProvider,
@@ -59,6 +56,6 @@ func NewService(
 		userSaver:    userSaver,
 		userProvider: userProvider,
 		appProvider:  appProvider,
-		tokenTTL:     conf.GetTokenTTL(),
+		tokenTTL:     conf.TokenTTL,
 	}
 }

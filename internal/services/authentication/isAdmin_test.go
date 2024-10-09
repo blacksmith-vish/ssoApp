@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"log/slog"
+	"sso/internal/lib/config"
 	"sso/internal/services/authentication/mocks"
 	serviceModels "sso/internal/services/authentication/models"
 	"sso/internal/store/sqlite"
@@ -14,18 +15,10 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type ConfigTest struct {
-	tokenTTL time.Duration
-}
-
-func NewConfigTest() *ConfigTest {
-	return &ConfigTest{
-		tokenTTL: time.Minute,
+func NewConfigTest() config.AuthenticationService {
+	return config.AuthenticationService{
+		TokenTTL: time.Minute,
 	}
-}
-
-func (conf ConfigTest) GetTokenTTL() time.Duration {
-	return conf.tokenTTL
 }
 
 func TestMaxWidth(t *testing.T) {

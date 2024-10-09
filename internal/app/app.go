@@ -34,15 +34,15 @@ func NewApp(
 	// Инициализация auth сервиса
 	authService := authService.NewService(
 		log,
-		conf.Services.Authentication,
+		conf.AuthenticationService,
 		storage,
 		storage,
 		storage,
 	)
 
-	grpcapp := grpcApp.NewGrpcApp(log, conf.Servers.GRPC, authService)
+	grpcapp := grpcApp.NewGrpcApp(log, conf.GrpcConfig, authService)
 
-	restapp := restApp.NewRestApp(log, conf.Servers.REST, authentication.NewAuthenticationServer(log, authService))
+	restapp := restApp.NewRestApp(log, conf.RestConfig, authentication.NewAuthenticationServer(log, authService))
 
 	return &App{
 		GRPCServer: grpcapp,

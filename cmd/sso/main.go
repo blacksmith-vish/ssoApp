@@ -10,14 +10,17 @@ import (
 	"sso/internal/app"
 	"sso/internal/lib/config"
 	"sso/internal/lib/logger"
+	config_yaml "sso/internal/store/filesystem/config/yaml"
 )
 
 func main() {
 
 	// Инициализация конфига
-	conf := config.MustLoad()
+	yaml := config_yaml.MustLoad()
 
-	log := logger.SetupLoggerWithConf(conf)
+	conf := config.NewConfig(yaml)
+
+	log := logger.SetupLogger(conf.Env)
 
 	log.Info("start app")
 
@@ -37,7 +40,7 @@ func main() {
 
 	log.Info("app stopping", slog.String("signal", sig.String()))
 
-	ctx, cancel := context.WithTimeout(context.Background(), conf.Servers.REST.Timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), conf.RestConfig.Timeout)
 	defer func() {
 		// extra handling here
 		cancel()
