@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"sso/internal/services/authentication/models"
-	"sso/internal/store/sqlite"
+	auth_store "sso/internal/store/sql/authentication"
 
 	"github.com/go-playground/validator/v10"
 
@@ -42,7 +42,7 @@ func (srv server) register() http.HandlerFunc {
 		)
 
 		if err != nil {
-			if errors.Is(err, sqlite.ErrUserExists) {
+			if errors.Is(err, auth_store.ErrUserExists) {
 
 				log.Error("registration failed", slog.String("err", err.Error()))
 

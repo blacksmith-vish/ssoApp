@@ -5,7 +5,7 @@ import (
 
 	"log/slog"
 	"sso/internal/services/authentication/models"
-	"sso/internal/store/sqlite"
+	auth_store "sso/internal/store/sql/authentication"
 
 	"github.com/pkg/errors"
 
@@ -35,9 +35,9 @@ func (a *Authentication) RegisterNewUser(
 	ID, err := a.userSaver.SaveUser(ctx, request.Nickname, request.Email, passHash)
 	if err != nil {
 
-		if errors.Is(err, sqlite.ErrUserExists) {
+		if errors.Is(err, auth_store.ErrUserExists) {
 			log.Warn("user exists", slog.String("", err.Error()))
-			return models.RegisterResponse{}, errors.Wrap(sqlite.ErrUserExists, op)
+			return models.RegisterResponse{}, errors.Wrap(auth_store.ErrUserExists, op)
 		}
 
 		log.Error("failed to save user", slog.String("", err.Error()))
