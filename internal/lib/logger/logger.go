@@ -8,6 +8,10 @@ import (
 	"sso/internal/lib/logger/handlers/dev"
 )
 
+type Config interface {
+	GetEnv() string
+}
+
 func SetupLogger(env string) *slog.Logger {
 
 	devHandler := dev.NewHandler(

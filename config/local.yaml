@@ -12,13 +12,16 @@ services:
 servers:
 
   grpc:
-    port: 44844
-    timeout: 5s
+    server:
+      port: 44844
+      timeout: 5s
 
   rest:
-    port: 8080
-    timeout: 5s
+    server:
+      port: 8080
+      timeout: 5s
   
   routes:
-    port: 3000
-    timeout: 5s
+    server:
+      port: 3000
+      timeout: 5s

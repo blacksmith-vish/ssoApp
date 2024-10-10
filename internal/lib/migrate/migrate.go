@@ -14,6 +14,12 @@ type Storage interface {
 	MigrationsPath() string
 }
 
+func MustMigrate(store Storage) {
+	if err := Migrate(store); err != nil {
+		panic(err)
+	}
+}
+
 func Migrate(store Storage) error {
 
 	goose.SetBaseFS(embed.SQLiteMigrations)

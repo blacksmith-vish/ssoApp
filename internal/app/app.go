@@ -8,7 +8,8 @@ import (
 	"sso/internal/lib/config"
 	"sso/internal/lib/migrate"
 	authService "sso/internal/services/authentication"
-	"sso/internal/store/sqlite"
+	sqlstore "sso/internal/store/sql"
+	"sso/internal/store/sql/sqlite"
 )
 
 type App struct {
@@ -22,27 +23,23 @@ func NewApp(
 ) *App {
 
 	// Инициализация хранилища
-	storage, err := sqlite.New(conf.StorePath)
-	if err != nil {
-		panic(err)
-	}
+	sqliteStore := sqlite.MustInitSqlite(conf.StorePath)
+	migrate.MustMigrate(sqliteStore)
 
-	if err := migrate.Migrate(storage); err != nil {
-		panic(err)
-	}
+	store := sqlstore.NewStore(sqliteStore)
 
 	// Инициализация auth сервиса
 	authService := authService.NewService(
 		log,
-		conf.Services.Authentication,
-		storage,
-		storage,
-		storage,
+		conf.AuthenticationService,
+		store.AuthenticationStore(),
+		store.AuthenticationStore(),
+		store.AuthenticationStore(),
 	)
 
-	grpcapp := grpcApp.NewGrpcApp(log, conf.Servers.GRPC, authService)
+	grpcapp := grpcApp.NewGrpcApp(log, conf.GrpcConfig, authService)
 
-	restapp := restApp.NewRestApp(log, conf.Servers.REST, authentication.NewAuthenticationServer(log, authService))
+	restapp := restApp.NewRestApp(log, conf.RestConfig, authentication.NewAuthenticationServer(log, authService))
 
 	return &App{
 		GRPCServer: grpcapp,

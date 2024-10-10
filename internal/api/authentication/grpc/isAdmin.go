@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"sso/internal/services/authentication/models"
-	"sso/internal/store/sqlite"
+	auth_store "sso/internal/store/sql/authentication"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
@@ -39,7 +39,7 @@ func (srv *server) IsAdmin(
 	)
 
 	if err != nil {
-		if errors.Is(err, sqlite.ErrUserNotFound) {
+		if errors.Is(err, auth_store.ErrUserNotFound) {
 			return nil, status.Error(codes.AlreadyExists, "login failed")
 		}
 		return nil, status.Error(codes.Internal, "login failed")
