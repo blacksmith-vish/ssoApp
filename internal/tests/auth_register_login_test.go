@@ -25,7 +25,6 @@ func TestRegisterLogin_Login_HappyPass(t *testing.T) {
 	ctx, st := suite.New(t)
 
 	email := gofakeit.Email()
-
 	password := randomPassword()
 
 	responseRegister, err := st.AuthClient.Register(ctx, &sso.RegisterRequest{
@@ -65,7 +64,7 @@ func TestRegisterLogin_Login_HappyPass(t *testing.T) {
 
 	const deltaSeconds = 1
 
-	assert.InDelta(t, loginTime.Add(st.Conf.Services.Authentication.TokenTTL).Unix(), claims["exp"].(float64), deltaSeconds)
+	assert.InDelta(t, loginTime.Add(st.Conf.AuthenticationService.TokenTTL).Unix(), claims["exp"].(float64), deltaSeconds)
 
 }
 

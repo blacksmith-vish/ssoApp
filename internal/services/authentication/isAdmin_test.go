@@ -4,15 +4,22 @@ import (
 	"context"
 	"io"
 	"log/slog"
+	"sso/internal/lib/config"
 	"sso/internal/services/authentication/mocks"
 	serviceModels "sso/internal/services/authentication/models"
-	storeModels "sso/internal/store/models"
+	auth_store "sso/internal/store/sql/authentication"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
+
+func NewConfigTest() config.AuthenticationService {
+	return config.AuthenticationService{
+		TokenTTL: time.Minute,
+	}
+}
 
 func TestMaxWidth(t *testing.T) {
 
@@ -69,14 +76,14 @@ func TestMaxWidth(t *testing.T) {
 		On("IsAdmin", mock.Anything, "2").
 		Return(true, nil).
 		On("IsAdmin", mock.Anything, "-1").
-		Return(false, storeModels.ErrUserNotFound)
+		Return(false, auth_store.ErrUserNotFound)
 
 	service := NewService(
 		slog.New(slog.NewJSONHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelInfo})),
+		NewConfigTest(),
 		userSaver,
 		userProvider,
 		appProvider,
-		time.Minute,
 	)
 
 	for _, tt := range TestingTable {
