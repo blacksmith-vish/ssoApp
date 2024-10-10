@@ -24,18 +24,22 @@ func NewGrpcApp(
 	authService authenticationGRPC.Authentication,
 ) *App {
 
+	Log := log.WithGroup(
+		"gRPC",
+	)
+
 	gRPCServer := grpc.NewServer()
 
 	sso.RegisterAuthenticationServer(
 		gRPCServer,
 		authenticationGRPC.NewAuthenticationServer(
-			log,
+			Log,
 			authService,
 		),
 	)
 
 	return &App{
-		log:        log,
+		log:        Log,
 		gRPCServer: gRPCServer,
 		port:       conf.Port,
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"sso/internal/lib/config"
 	"sso/internal/store/models"
 	"time"
 )
@@ -45,16 +46,16 @@ type Authentication struct {
 // New returns a new instance of Auth
 func NewService(
 	log *slog.Logger,
+	conf config.AuthenticationService,
 	userSaver UserSaver,
 	userProvider UserProvider,
 	appProvider AppProvider,
-	tokenTTL time.Duration,
 ) *Authentication {
 	return &Authentication{
 		log:          log,
 		userSaver:    userSaver,
 		userProvider: userProvider,
 		appProvider:  appProvider,
-		tokenTTL:     tokenTTL,
+		tokenTTL:     conf.TokenTTL,
 	}
 }

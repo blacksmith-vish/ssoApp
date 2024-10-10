@@ -2,10 +2,10 @@ package config
 
 import "time"
 
-type Authentication struct {
-	TokenTTL time.Duration `yaml:"token_ttl"`
+type AuthenticationService struct {
+	TokenTTL time.Duration
 }
 
 type Services struct {
-	Authentication Authentication `yaml:"authentication"`
+	AuthenticationService AuthenticationService
 }

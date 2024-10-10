@@ -43,10 +43,6 @@ func (srv server) InitRouters(router *chi.Mux) {
 	fs := http.FileServer(http.FS(embed.StaticFiles))
 	router.Handle("/static/*", fs)
 
-	router.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World!"))
-	})
-
 	router.Post("/register", srv.register())
 
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
@@ -62,5 +58,15 @@ func (srv server) InitRouters(router *chi.Mux) {
 
 		templ.ExecuteTemplate(w, "index.html", nil)
 	})
+
+	// Creating a New Router
+	apiRouter := chi.NewRouter()
+
+	apiRouter.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello World!"))
+	})
+
+	// Mounting the new Sub Router on the main router
+	router.Mount("/api", apiRouter)
 
 }

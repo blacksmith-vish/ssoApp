@@ -5,3 +5,11 @@ type App struct {
 	Secret string
 	ID     string
 }
+
+func (app App) GetID() string {
+	return app.ID
+}
+
+func (app App) GetSecret() []byte {
+	return []byte(app.Secret)
+}

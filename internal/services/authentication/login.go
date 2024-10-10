@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"sso/internal/lib/jwt"
 	"sso/internal/services/authentication/models"
-	"sso/internal/store/sqlite"
+	auth_store "sso/internal/store/sql/authentication"
 
 	"github.com/pkg/errors"
 
@@ -30,7 +30,7 @@ func (a *Authentication) Login(
 	user, err := a.userProvider.User(ctx, request.Email)
 	if err != nil {
 
-		if errors.Is(err, sqlite.ErrUserNotFound) {
+		if errors.Is(err, auth_store.ErrUserNotFound) {
 			log.Warn("user not found", slog.String("", err.Error()))
 
 			return models.LoginResponse{}, errors.Wrap(ErrInvalidCredentials, op)
@@ -48,7 +48,7 @@ func (a *Authentication) Login(
 	app, err := a.appProvider.App(ctx, request.AppID)
 	if err != nil {
 
-		if errors.Is(err, sqlite.ErrAppNotFound) {
+		if errors.Is(err, auth_store.ErrAppNotFound) {
 			log.Warn("user not found", slog.String("", err.Error()))
 			return models.LoginResponse{}, errors.Wrap(ErrInvalidAppID, op)
 		}

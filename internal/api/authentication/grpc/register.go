@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"sso/internal/services/authentication/models"
-	"sso/internal/store/sqlite"
+	auth_store "sso/internal/store/sql/authentication"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
@@ -38,7 +38,7 @@ func (srv *server) Register(
 		serviceRequest,
 	)
 	if err != nil {
-		if errors.Is(err, sqlite.ErrUserExists) {
+		if errors.Is(err, auth_store.ErrUserExists) {
 			return nil, status.Error(codes.AlreadyExists, "login failed")
 		}
 		return nil, status.Error(codes.Internal, "login failed")
